@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Career Tool Suite Dashboard</title>
+    <style>
+        :root {
+            --primary-blue: #0d6efd;
+            --dark-blue: #0a58ca;
+            --bg-color: #f4f6f9;
+            --sidebar-width: 250px;
+            --text-color: #333;
+            --border-color: #dee2e6;
+            --success-green: #198754;
+            --warning-orange: #fd7e14;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            display: flex;
+            min-height: 100vh;
+            color: var(--text-color);
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: white;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            position: fixed;
+            height: 100%;
+            z-index: 1000;
+        }
+
+        .brand {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-blue);
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            text-align: left;
+            padding: 12px 15px;
+            margin-bottom: 5px;
+            cursor: pointer;
+            border-radius: 6px;
+            color: #555;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background-color: #e9ecef;
+            color: var(--primary-blue);
+        }
+
+        .nav-btn.active {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+
+        /* Main Content Styling */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 30px;
+            width: calc(100% - var(--sidebar-width));
+        }
+
+        .header {
+            margin-bottom: 25px;
+        }
+
+        .header h2 {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.95rem;
+            transition: border 0.2s;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+        }
+
+        textarea {
+            height: 200px;
+            resize: vertical;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--dark-blue);
+        }
+
+        .btn-copy {
+            background-color: #e9ecef;
+            color: #333;
+            border: 1px solid #ced4da;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .btn-copy:hover {
+            background-color: #dde2e6;
+        }
+
+        .btn-copy-small {
+            background-color: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            margin-top: 10px;
+        }
+
+        .btn-copy-small:hover {
+            background-color: var(--dark-blue);
+        }
+
+        /* Output Areas */
+        .output-box {
+            background-color: #f8f9fa;
+            border: 1px dashed var(--border-color);
+            padding: 20px;
+            border-radius: 6px;
+            margin-top: 15px;
+        }
+
+        .result-item {
+            background: white;
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.85rem;
+        }
+
+        /* Application Methods Styling */
+        .application-methods {
+            background: #e8f4fd;
+            border: 1px solid #b6e4fe;
+            border-radius: 6px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+
+        .application-methods h4 {
+            color: var(--primary-blue);
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+
+        .method-section {
+            margin-bottom: 20px;
+            background: white;
+            border-radius: 6px;
+            padding: 15px;
+            border: 1px solid var(--border-color);
+        }
+
+        .method-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .method-section-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--primary-blue);
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .method-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .method-item {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            border-left: 3px solid var(--primary-blue);
+            word-break: break-all;
+        }
+
+        .method-item.email {
+            border-left-color: var(--success-green);
+        }
+
+        .method-item.link {
+            border-left-color: var(--warning-orange);
+        }
+
+        .method-item a {
+            color: var(--primary-blue);
+            text-decoration: none;
+        }
+
+        .method-item a:hover {
+            text-decoration: underline;
+        }
+
+        .email-address {
+            color: var(--success-green);
+            font-weight: 500;
+        }
+
+        .link-address {
+            color: var(--warning-orange);
+            font-weight: 500;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        ::placeholder {
+            color: #adb5bd;
+            font-style: italic;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+            body {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <div class="brand">
+            <span>🚀 Career Tool Suite</span>
+        </div>
+        <button class="nav-btn active" onclick="switchTab('feature1')" id="nav-feature1">💧 Watermark Generator</button>
+        <button class="nav-btn" onclick="switchTab('feature2')" id="nav-feature2">🔍 Job Application Finder</button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        
+        <!-- FEATURE 1: Watermark Generator -->
+        <div id="feature1" class="feature-section">
+            <div class="header">
+                <h2>Watermark & Text Generator</h2>
+                <p style="color: #666; font-size: 0.9rem;">Generate formatted text for job selection proofs.</p>
+            </div>
+
+            <div class="card">
+                <div class="form-group">
+                    <label>Nama Perusahaan</label>
+                    <input type="text" id="companyName" placeholder="Ketik nama perusahaan..." autocomplete="off" oninput="this.value = this.value.trim()">
+                </div>
+                
+                <div style="display: flex; gap: 15px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Hari dari Sekarang (0 = Hari ini)</label>
+                        <input type="number" id="daysOffset" placeholder="0" min="0" autocomplete="off">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Jumlah Duplikasi (Array)</label>
+                        <input type="number" id="duplicateCount" placeholder="1" min="1" autocomplete="off">
+                    </div>
+                </div>
+
+                <button class="btn-primary" onclick="generateWatermark()">Generate Output</button>
+
+                <!-- Output Single -->
+                <div class="form-group" style="margin-top: 20px;">
+                    <label>Single Output</label>
+                    <div class="output-box" id="singleOutput">
+                        Hasil akan muncul di sini...
+                    </div>
+                    <button class="btn-copy" onclick="copyText('singleOutput')">Salin Teks</button>
+                </div>
+
+                <!-- Output Array -->
+                <div class="form-group">
+                    <label>Array Output (List)</label>
+                    <div id="arrayOutput" style="max-height: 300px; overflow-y: auto; margin-bottom: 10px;">
+                        <!-- List items will appear here -->
+                    </div>
+                    <button class="btn-copy" onclick="copyArray()">Salin Semua List</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- FEATURE 2: Job Application Finder (SIMPLIFIED) -->
+        <div id="feature2" class="feature-section hidden">
+            <div class="header">
+                <h2>Job Application Finder</h2>
+                <p style="color: #666; font-size: 0.9rem;">Paste job description to find application methods (Email/Link).</p>
+            </div>
+
+            <div class="card">
+                <div class="form-group">
+                    <label>Paste Job Description Here</label>
+                    <textarea id="jobDescription" placeholder="Paste full text of job vacancy here..." autocomplete="off" spellcheck="false"></textarea>
+                </div>
+
+                <button class="btn-primary" onclick="analyzeJob()">Find Application Methods</button>
+
+                <div id="jobResult" class="output-box hidden" style="margin-top: 20px; border-style: solid; background: white;">
+                    <h3 style="margin-bottom: 20px; color: var(--primary-blue);">📬 Application Methods Found</h3>
+                    
+                    <!-- Application Methods Only -->
+                    <div class="application-methods">
+                        <div id="applicationMethodsContent">
+                            <p style="color: #999; font-style: italic;">No application method detected</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Global variables to store emails and links
+        let extractedEmails = [];
+        let extractedLinks = [];
+
+        // --- NAVIGATION LOGIC ---
+        function switchTab(featureId) {
+            const sections = document.querySelectorAll('.feature-section');
+            sections.forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            const navButtons = document.querySelectorAll('.nav-btn');
+            navButtons.forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            const selectedSection = document.getElementById(featureId);
+            if (selectedSection) {
+                selectedSection.classList.remove('hidden');
+            }
+            
+            const activeButton = document.getElementById('nav-' + featureId);
+            if (activeButton) {
+                activeButton.classList.add('active');
+            }
+
+            clearAllInputs();
+        }
+
+        function clearAllInputs() {
+            document.getElementById('companyName').value = '';
+            document.getElementById('daysOffset').value = '';
+            document.getElementById('duplicateCount').value = '';
+            document.getElementById('singleOutput').innerText = 'Hasil akan muncul di sini...';
+            document.getElementById('arrayOutput').innerHTML = '';
+            document.getElementById('jobDescription').value = '';
+            document.getElementById('jobResult').classList.add('hidden');
+            extractedEmails = [];
+            extractedLinks = [];
+        }
+
+        // --- FEATURE 1 LOGIC ---
+        function generateWatermark() {
+            let company = document.getElementById('companyName').value.trim().toUpperCase();
+            let daysInput = document.getElementById('daysOffset').value.trim();
+            let countInput = document.getElementById('duplicateCount').value.trim();
+            const fixedText = "DIUNGGAH UNTUK SELEKSI KERJA";
+
+            if (!company) {
+                alert("Mohon isi Nama Perusahaan");
+                return;
+            }
+
+            let days = daysInput === '' ? 0 : parseInt(daysInput);
+            let count = countInput === '' ? 1 : parseInt(countInput);
+
+            if (isNaN(days)) days = 0;
+            if (isNaN(count) || count < 1) count = 1;
+
+            const date = new Date();
+            date.setDate(date.getDate() + days);
+            
+            const options = { day: 'numeric', month: 'long', year: 'numeric' };
+            const dateString = date.toLocaleDateString('id-ID', options).toUpperCase();
+
+            const finalString = `${fixedText} ${company} ${dateString}`;
+
+            document.getElementById('singleOutput').innerText = finalString;
+
+            const arrayContainer = document.getElementById('arrayOutput');
+            arrayContainer.innerHTML = '';
+
+            for (let i = 0; i < count; i++) {
+                const div = document.createElement('div');
+                div.className = 'result-item';
+                div.innerText = finalString;
+                arrayContainer.appendChild(div);
+            }
+        }
+
+        function copyText(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            if (text === 'Hasil akan muncul di sini...') {
+                alert("Generate output terlebih dahulu!");
+                return;
+            }
+            navigator.clipboard.writeText(text).then(() => alert("Teks berhasil disalin!"));
+        }
+
+        function copyArray() {
+            const items = document.querySelectorAll('#arrayOutput .result-item');
+            if (items.length === 0) {
+                alert("Generate output terlebih dahulu!");
+                return;
+            }
+            const textArray = [];
+            items.forEach(item => {
+                textArray.push(item.innerText);
+            });
+            const fullText = textArray.join('\n');
+            navigator.clipboard.writeText(fullText).then(() => alert("Semua list berhasil disalin!"));
+        }
+
+        // --- FEATURE 2 LOGIC (SIMPLIFIED) ---
+        function analyzeJob() {
+            const text = document.getElementById('jobDescription').value;
+            const resultBox = document.getElementById('jobResult');
+
+            if (!text.trim()) {
+                alert("Mohon paste job description terlebih dahulu.");
+                return;
+            }
+
+            resultBox.classList.remove('hidden');
+
+            // Extract emails and links only
+            const emails = extractAllEmails(text);
+            const links = extractAllLinks(text);
+
+            displayApplicationMethods(emails, links);
+        }
+
+        function extractAllEmails(text) {
+            const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/g;
+            const emails = text.match(emailRegex);
+            
+            if (emails && emails.length > 0) {
+                extractedEmails = [...new Set(emails)];
+                return extractedEmails;
+            }
+            
+            extractedEmails = [];
+            return null;
+        }
+
+        function extractAllLinks(text) {
+            const linkRegex = /(https?:\/\/[^\s<>"']+)/g;
+            const links = text.match(linkRegex);
+            
+            if (links && links.length > 0) {
+                const filtered = links.filter(l => !l.match(/\.(jpg|jpeg|png|gif|svg)$/i));
+                extractedLinks = [...new Set(filtered)];
+                return extractedLinks;
+            }
+            
+            extractedLinks = [];
+            return null;
+        }
+
+        function displayApplicationMethods(emails, links) {
+            const container = document.getElementById('applicationMethodsContent');
+            let html = '';
+            let hasContent = false;
+
+            // EMAIL SECTION
+            if (emails && emails.length > 0) {
+                hasContent = true;
+                html += `
+                    <div class="method-section">
+                        <div class="method-section-title">📧 EMAIL</div>
+                        <div class="method-list">
+                `;
+                
+                emails.forEach((email, index) => {
+                    html += `
+                        <div class="method-item email">
+                            <span class="email-address">${email}</span>
+                        </div>
+                    `;
+                });
+                
+                html += `
+                        </div>
+                        <button class="btn-copy-small" onclick="copyAllEmails()">Salin Semua Email (TEXTJOIN)</button>
+                    </div>
+                `;
+            }
+
+            // LINK SECTION
+            if (links && links.length > 0) {
+                hasContent = true;
+                html += `
+                    <div class="method-section">
+                        <div class="method-section-title">🔗 LINK / WEBSITE</div>
+                        <div class="method-list">
+                `;
+                
+                links.forEach((link, index) => {
+                    html += `
+                        <div class="method-item link">
+                            <a href="${link}" target="_blank">${link}</a>
+                        </div>
+                    `;
+                });
+                
+                html += `
+                        </div>
+                    </div>
+                `;
+            }
+
+            // WHATSAPP SECTION (if no email or link)
+            if (!emails && !links) {
+                const waMatch = text.match(/(wa\.me\/\d+|whatsapp\.com\/\d+|\+?\d{1,3}[\s-]?\d{8,12})/g);
+                if (waMatch) {
+                    hasContent = true;
+                    const unique = [...new Set(waMatch)];
+                    html += `
+                        <div class="method-section">
+                            <div class="method-section-title">📱 WHATSAPP</div>
+                            <div class="method-list">
+                    `;
+                    unique.forEach((wa, index) => {
+                        html += `
+                            <div class="method-item">
+                                <span style="color: var(--success-green); font-weight: bold;">${wa}</span>
+                            </div>
+                        `;
+                    });
+                    html += `
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            if (!hasContent) {
+                html = '<p style="color: #999; font-style: italic;">No application method detected. Please check the job description manually.</p>';
+            }
+
+            container.innerHTML = html;
+        }
+
+        // Copy all emails joined with comma (TEXTJOIN style) - SIMPLE NOTIFICATION
+        function copyAllEmails() {
+            if (extractedEmails.length === 0) {
+                alert("Tidak ada email yang ditemukan!");
+                return;
+            }
+            
+            // Join with comma, no space (like TEXTJOIN)
+            const emailsText = extractedEmails.join(',');
+            navigator.clipboard.writeText(emailsText).then(() => {
+                alert("Email berhasil disalin!");
+            });
+        }
+
+        // Initialize
+        window.onload = function() {
+            document.getElementById('feature1').classList.remove('hidden');
+            document.getElementById('feature2').classList.add('hidden');
+            document.getElementById('nav-feature1').classList.add('active');
+            document.getElementById('nav-feature2').classList.remove('active');
+            clearAllInputs();
+        };
+
+    </script>
+</body>
+</html>
