@@ -33,7 +33,7 @@
             overflow-x: hidden;
         }
 
-        /* Sidebar - Optimized for non-collision */
+        /* Sidebar - Optimized for non-collision and windowed mode */
         .sidebar {
             width: var(--sidebar-width);
             background-color: var(--sidebar-bg);
@@ -46,7 +46,6 @@
             bottom: 0;
             padding: 32px 16px;
             z-index: 100;
-            transition: transform 0.3s ease;
         }
 
         .brand {
@@ -93,7 +92,7 @@
             padding: 60px 40px;
             display: flex;
             justify-content: center;
-            min-width: 0; /* Important for flex child shrink */
+            min-width: 0;
         }
 
         .container {
@@ -140,10 +139,7 @@
             outline: none;
             background-color: #fff;
             color: var(--text-main);
-            transition: border-color 0.2s;
         }
-        
-        input:focus, textarea:focus { border-color: var(--primary); }
 
         textarea { min-height: 150px; resize: vertical; }
 
@@ -155,10 +151,7 @@
             text-align: center;
             background: #f8fafc;
             cursor: pointer;
-            transition: background 0.2s;
         }
-        
-        .file-upload-wrapper:hover { background: #f1f5f9; }
 
         .file-upload-wrapper input[type="file"] {
             position: absolute; width: 100%; height: 100%; top: 0; left: 0; opacity: 0; cursor: pointer;
@@ -168,10 +161,8 @@
             background-color: var(--primary);
             color: #fff; border: none; padding: 14px 32px; border-radius: 8px;
             cursor: pointer; font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 8px;
-            transition: background 0.2s;
         }
 
-        .btn-primary:hover { background-color: var(--primary-hover); }
         .btn-primary:disabled { background-color: #94a3b8; cursor: not-allowed; }
 
         .output-container { margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--border); }
@@ -199,28 +190,18 @@
         #copyBuffer { position: absolute; left: -9999px; }
 
         /* Responsive Breakpoints - Improved for windowed mode */
-        @media (max-width: 1024px) {
-            :root { --sidebar-width: 240px; }
-        }
-
         @media (max-width: 900px) {
             body { flex-direction: column; }
             .sidebar { 
                 width: 100%; 
                 height: auto; 
-                position: sticky; 
+                position: relative; 
                 border-right: none; 
                 border-bottom: 1px solid var(--border);
                 padding: 16px; 
             }
             .main-content { margin-left: 0; padding: 24px 16px; }
-            .nav-menu { 
-                flex-direction: row; 
-                overflow-x: auto; 
-                padding-bottom: 8px;
-                scrollbar-width: none;
-            }
-            .nav-menu::-webkit-scrollbar { display: none; }
+            .nav-menu { flex-direction: row; overflow-x: auto; padding-bottom: 8px; }
             .nav-btn { white-space: nowrap; width: auto; }
             .brand { padding: 0 0 16px 0; text-align: center; }
         }
@@ -352,34 +333,22 @@
         const apiKey = "AIzaSyBPcVRJ7mBr7aMPiSO26Fq6JMIav-gSKa8"; 
         let currentFileData = { base64: null, type: null };
 
-        // Tab Management
         function switchTab(id) {
             document.querySelectorAll('.feature-section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             document.getElementById('btn-tab-' + id).classList.add('active');
-            // Scroll to top when switching
-            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function handleFile(input, displayId) {
             const file = input.files[0];
             if (!file) return;
-            
-            // Check file size (Gemini inline limit is around 20MB, we check 10MB safely)
-            if (file.size > 10 * 1024 * 1024) {
-                showToast("File terlalu besar (Maks 10MB)");
-                input.value = "";
-                return;
-            }
-
             document.getElementById(displayId).innerText = `File terpilih: ${file.name}`;
             const reader = new FileReader();
             reader.onload = (e) => {
                 currentFileData.base64 = e.target.result.split(',')[1];
                 currentFileData.type = file.type;
             };
-            reader.onerror = () => showToast("Gagal membaca file");
             reader.readAsDataURL(file);
         }
 
@@ -406,7 +375,6 @@
                 item.innerText = text;
                 listOutput.appendChild(item);
             }
-            
             document.getElementById('watermarkResult').classList.remove('hidden');
         }
 
@@ -419,12 +387,9 @@
             try {
                 let finalTeks = textInput;
                 if (currentFileData.base64) {
-                    // Optimized Prompt for precise Extraction
-                    const ocrPrompt = "TRANSCRIPTION TASK: Extract every single piece of text from this document/image. Maintain exact capitalization. No commentary, just the raw text.";
-                    finalTeks = await geminiCall(ocrPrompt, currentFileData);
+                    finalTeks = await geminiCall("OCR TASK: Transcribe all text from the image/pdf. Keep the original case sensitivity strictly.", currentFileData);
                 }
                 
-                // Enhanced Regex for Case Sensitive matching
                 const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/g;
                 const linkRegex = /((?:https?:\/\/|www\.)[^\s<>"',()]+|(?:\b[a-zA-Z0-9-]+\.(?:ly|ee|com|net|id|me|link|info|be|gl|co|site|online)\/[^\s<>"',()]+))/gi;
                 const waRegex = /(\+?62[\s-]?\d{8,15}|08\d{8,13}|wa\.me\/\d+|whatsapp\.com\/\d+)/g;
@@ -441,11 +406,10 @@
                 if (was.length) renderRes(container, "💬 Kontak WhatsApp", was);
                 
                 if (!emails.length && !links.length && !was.length) {
-                    container.innerHTML = '<div class="card" style="text-align:center; color:var(--text-muted)">Kontak tidak ditemukan dalam teks/gambar ini.</div>';
+                    container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted)">Data tidak ditemukan.</div>';
                 }
                 document.getElementById('jobResult').classList.remove('hidden');
             } catch (e) {
-                console.error(e);
                 showToast("Gagal melakukan ekstraksi: " + e.message);
             } finally {
                 setLoading('btnExtract', false);
@@ -454,21 +418,19 @@
 
         function renderRes(parent, title, items, isLink = false) {
             const div = document.createElement('div');
-            div.style.cssText = "background:#fff; border:1px solid var(--border); border-radius:8px; padding:20px; margin-bottom:16px; box-shadow: var(--shadow);";
-            div.innerHTML = `<div style="font-weight:700; font-size:11px; color:var(--primary); margin-bottom:12px; text-transform:uppercase; letter-spacing:0.05em;">${title}</div>`;
+            div.style.cssText = "background:#fff; border:1px solid var(--border); border-radius:8px; padding:20px; margin-bottom:16px;";
+            div.innerHTML = `<div style="font-weight:700; font-size:12px; color:var(--primary); margin-bottom:12px; text-transform:uppercase;">${title}</div>`;
             items.forEach(item => {
                 const el = document.createElement(isLink ? 'a' : 'div');
                 if(isLink) {
                     el.href = item.startsWith('http') ? item : 'https://' + item;
                     el.target = "_blank";
                     el.style.color = "var(--primary)";
-                    el.style.textDecoration = "none";
                 }
                 el.innerText = item;
                 el.style.display = "block";
-                el.style.marginBottom = "8px";
+                el.style.marginBottom = "6px";
                 el.style.wordBreak = "break-all";
-                el.style.fontSize = "14px";
                 div.appendChild(el);
             });
             parent.appendChild(div);
@@ -485,7 +447,7 @@
                 document.getElementById('ocrOutput').innerText = result;
                 document.getElementById('ocrResult').classList.remove('hidden');
             } catch (e) {
-                showToast("Gagal memproses dokumen: " + e.message);
+                showToast("Gagal memproses gambar: " + e.message);
             } finally {
                 setLoading('btnOCR', false);
             }
@@ -494,28 +456,17 @@
         function resetOCR() {
             document.getElementById('ocrOutput').innerText = '';
             document.getElementById('ocrResult').classList.add('hidden');
-            document.getElementById('fileOCR').value = "";
-            document.getElementById('fileNameOCR').innerText = "Pilih atau Seret file ke sini";
-            currentFileData = { base64: null, type: null };
         }
 
-        // --- API CORE WITH PDF FIX ---
+        // --- API CORE (Fixed Model & Endpoint) ---
         async function geminiCall(prompt, fileData) {
-            // Note: Use gemini-2.5-flash-preview-09-2025 as requested
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-            
-            // Fix for PDF: ensure mimeType is passed correctly
+            // Menggunakan model gemini-1.5-flash yang lebih stabil dan didukung secara luas
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
             const parts = [{ text: prompt }];
             if (fileData?.base64) {
-                parts.push({ 
-                    inlineData: { 
-                        mimeType: fileData.type || "image/jpeg", 
-                        data: fileData.base64 
-                    } 
-                });
+                parts.push({ inlineData: { mimeType: fileData.type, data: fileData.base64 } });
             }
 
-            // Exponential backoff
             for (let i = 0; i < 5; i++) {
                 try {
                     const res = await fetch(url, {
@@ -530,17 +481,13 @@
                         throw new Error(data.error.message);
                     }
                     
-                    if (!data.candidates || data.candidates.length === 0) {
-                        throw new Error("AI tidak memberikan respon.");
-                    }
-                    
                     return data.candidates[0].content.parts[0].text;
                 } catch (e) {
                     if (i === 4) throw e;
-                    const delay = Math.pow(2, i) * 1000;
-                    await new Promise(r => setTimeout(r, delay));
+                    await new Promise(r => setTimeout(r, Math.pow(2, i) * 1000));
                 }
             }
+            throw new Error("Gagal menghubungi AI");
         }
 
         // --- UTILITIES ---
@@ -562,31 +509,19 @@
         }
 
         function executeCopy(val) {
-            if (!val) return;
             const buf = document.getElementById('copyBuffer');
             buf.value = val;
             buf.select();
-            try {
-                document.execCommand('copy');
-                showToast("Berhasil disalin!");
-            } catch (err) {
-                showToast("Gagal menyalin teks");
-            }
+            document.execCommand('copy');
+            showToast("Berhasil disalin!");
         }
 
         function showToast(m) {
-            // Remove existing toasts
-            document.querySelectorAll('.toast-msg').forEach(t => t.remove());
-            
             const t = document.createElement('div');
-            t.className = 'toast-msg';
             t.innerText = m;
-            t.style.cssText = `position:fixed; bottom:30px; right:30px; background:#1e293b; color:#fff; padding:12px 24px; border-radius:8px; font-size:13px; z-index:9999; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); transition: opacity 0.5s;`;
+            t.style.cssText = `position:fixed; bottom:30px; right:30px; background:#1e293b; color:#fff; padding:12px 24px; border-radius:8px; font-size:13px; z-index:9999; box-shadow: 0 4px 10px rgba(0,0,0,0.2);`;
             document.body.appendChild(t);
-            setTimeout(() => { 
-                t.style.opacity = '0'; 
-                setTimeout(() => t.remove(), 500); 
-            }, 3000);
+            setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 500); }, 3000);
         }
     </script>
 </body>
