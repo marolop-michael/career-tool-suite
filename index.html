@@ -3,661 +3,499 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Career Tool Suite Dashboard</title>
+    <title>Career Tool Suite - Professional Edition</title>
     <style>
         :root {
-            --primary-blue: #0d6efd;
-            --dark-blue: #0a58ca;
-            --bg-color: #f4f6f9;
-            --sidebar-width: 250px;
-            --text-color: #333;
-            --border-color: #dee2e6;
-            --success-green: #198754;
-            --warning-orange: #fd7e14;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-main: #fcfdfe;
+            --sidebar-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --radius: 12px;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
         }
 
         body {
-            background-color: var(--bg-color);
             display: flex;
+            background-color: var(--bg-main);
+            color: var(--text-main);
             min-height: 100vh;
-            color: var(--text-color);
         }
 
-        /* Sidebar Styling */
+        /* Sidebar */
         .sidebar {
-            width: var(--sidebar-width);
-            background-color: white;
-            border-right: 1px solid var(--border-color);
+            width: 280px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
             display: flex;
             flex-direction: column;
-            padding: 20px;
             position: fixed;
-            height: 100%;
-            z-index: 1000;
+            height: 100vh;
+            padding: 32px 16px;
+            z-index: 100;
         }
 
         .brand {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: var(--primary-blue);
-            margin-bottom: 30px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            padding: 0 12px 32px;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: -0.025em;
         }
 
-        .nav-btn {
-            background: none;
-            border: none;
-            text-align: left;
-            padding: 12px 15px;
-            margin-bottom: 5px;
-            cursor: pointer;
-            border-radius: 6px;
-            color: #555;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-
-        .nav-btn:hover {
-            background-color: #e9ecef;
-            color: var(--primary-blue);
-        }
-
-        .nav-btn.active {
-            background-color: var(--primary-blue);
-            color: white;
-        }
-
-        /* Main Content Styling */
-        .main-content {
-            margin-left: var(--sidebar-width);
-            flex: 1;
-            padding: 30px;
-            width: calc(100% - var(--sidebar-width));
-        }
-
-        .header {
-            margin-bottom: 25px;
-        }
-
-        .header h2 {
-            font-weight: 600;
-            color: #2c3e50;
-        }
-
-        /* Cards */
-        .card {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            padding: 25px;
-            margin-bottom: 20px;
-            border: 1px solid var(--border-color);
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            font-size: 0.9rem;
-            color: #555;
-        }
-
-        input[type="text"],
-        input[type="number"],
-        textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 0.95rem;
-            transition: border 0.2s;
-        }
-
-        input:focus, textarea:focus {
-            outline: none;
-            border-color: var(--primary-blue);
-            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
-        }
-
-        textarea {
-            height: 200px;
-            resize: vertical;
-        }
-
-        .btn-primary {
-            background-color: var(--primary-blue);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 500;
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        .btn-primary:hover {
-            background-color: var(--dark-blue);
-        }
-
-        .btn-copy {
-            background-color: #e9ecef;
-            color: #333;
-            border: 1px solid #ced4da;
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            margin-top: 10px;
-            width: 100%;
-        }
-
-        .btn-copy:hover {
-            background-color: #dde2e6;
-        }
-
-        .btn-copy-small {
-            background-color: var(--primary-blue);
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            margin-top: 10px;
-        }
-
-        .btn-copy-small:hover {
-            background-color: var(--dark-blue);
-        }
-
-        /* Output Areas */
-        .output-box {
-            background-color: #f8f9fa;
-            border: 1px dashed var(--border-color);
-            padding: 20px;
-            border-radius: 6px;
-            margin-top: 15px;
-        }
-
-        .result-item {
-            background: white;
-            border: 1px solid var(--border-color);
-            padding: 10px;
-            margin-bottom: 8px;
-            border-radius: 4px;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 0.85rem;
-        }
-
-        /* Application Methods Styling */
-        .application-methods {
-            background: #e8f4fd;
-            border: 1px solid #b6e4fe;
-            border-radius: 6px;
-            padding: 20px;
-            margin-top: 15px;
-        }
-
-        .application-methods h4 {
-            color: var(--primary-blue);
-            margin-bottom: 15px;
-            font-size: 1rem;
-        }
-
-        .method-section {
-            margin-bottom: 20px;
-            background: white;
-            border-radius: 6px;
-            padding: 15px;
-            border: 1px solid var(--border-color);
-        }
-
-        .method-section:last-child {
-            margin-bottom: 0;
-        }
-
-        .method-section-title {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--primary-blue);
-            margin-bottom: 10px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .method-list {
+        .nav-menu {
             display: flex;
             flex-direction: column;
             gap: 8px;
         }
 
-        .method-item {
-            background: #f8f9fa;
-            padding: 10px;
-            border-radius: 4px;
-            border-left: 3px solid var(--primary-blue);
-            word-break: break-all;
-        }
-
-        .method-item.email {
-            border-left-color: var(--success-green);
-        }
-
-        .method-item.link {
-            border-left-color: var(--warning-orange);
-        }
-
-        .method-item a {
-            color: var(--primary-blue);
-            text-decoration: none;
-        }
-
-        .method-item a:hover {
-            text-decoration: underline;
-        }
-
-        .email-address {
-            color: var(--success-green);
+        .nav-btn {
+            width: 100%;
+            padding: 12px 16px;
+            border: none;
+            background: transparent;
+            text-align: left;
+            cursor: pointer;
+            font-size: 14px;
             font-weight: 500;
+            color: var(--text-muted);
+            border-radius: var(--radius);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
-        .link-address {
-            color: var(--warning-orange);
-            font-weight: 500;
+        .nav-btn.active {
+            background-color: #eff6ff;
+            color: var(--primary);
+            font-weight: 600;
         }
 
-        .hidden {
-            display: none !important;
+        /* Layout Area */
+        .main-content {
+            margin-left: 280px;
+            flex: 1;
+            padding: 60px 40px;
+            display: flex;
+            justify-content: center;
         }
 
-        ::placeholder {
-            color: #adb5bd;
-            font-style: italic;
+        .container {
+            width: 100%;
+            max-width: 800px;
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 100%;
-                height: auto;
-                position: relative;
-                border-right: none;
-                border-bottom: 1px solid var(--border-color);
-            }
-            .main-content {
-                margin-left: 0;
-                width: 100%;
-            }
-            body {
-                flex-direction: column;
-            }
+        .feature-section {
+            display: none;
+        }
+
+        .feature-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .header-title { margin-bottom: 32px; }
+        .header-title h1 { font-size: 1.875rem; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
+        .header-title p { color: var(--text-muted); font-size: 0.95rem; }
+
+        .card {
+            background: #ffffff;
+            border-radius: var(--radius);
+            padding: 32px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+        }
+
+        .form-group { margin-bottom: 24px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: var(--text-main); }
+
+        input[type="text"], input[type="number"], textarea {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+            background-color: #fff;
+            color: var(--text-main);
+        }
+
+        textarea { min-height: 150px; }
+
+        .file-upload-wrapper {
+            position: relative;
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            background: #f8fafc;
+            cursor: pointer;
+        }
+
+        .file-upload-wrapper input[type="file"] {
+            position: absolute; width: 100%; height: 100%; top: 0; left: 0; opacity: 0; cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: #fff; border: none; padding: 14px 32px; border-radius: 8px;
+            cursor: pointer; font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 8px;
+        }
+
+        .btn-primary:disabled { background-color: #94a3b8; cursor: not-allowed; }
+
+        .output-container { margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--border); }
+        .output-container.hidden { display: none; }
+        
+        .output-label { font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 12px; display: block; text-transform: uppercase; }
+        .output-box {
+            background-color: #ffffff; border: 1px solid var(--border); border-radius: 8px;
+            padding: 24px; font-family: 'SFMono-Regular', Consolas, monospace;
+            font-size: 14px; line-height: 1.7; color: #334155; white-space: pre-wrap;
+        }
+
+        .action-bar { margin-top: 16px; display: flex; gap: 12px; }
+        .btn-secondary { background-color: #f1f5f9; color: #475569; border: 1px solid var(--border); padding: 10px 20px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+
+        .loader {
+            display: inline-block; width: 18px; height: 18px;
+            border: 2px solid rgba(255,255,255,0.3); border-radius: 50%;
+            border-top-color: #fff; animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        #copyBuffer { position: absolute; left: -9999px; }
+
+        @media (max-width: 900px) {
+            .sidebar { width: 100%; height: auto; position: relative; border-right: none; padding: 16px; }
+            .main-content { margin-left: 0; padding: 24px; }
+            .nav-menu { flex-direction: row; overflow-x: auto; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Sidebar Navigation -->
-    <div class="sidebar">
-        <div class="brand">
-            <span>🚀 Career Tool Suite</span>
+    <textarea id="copyBuffer" aria-hidden="true"></textarea>
+
+    <nav class="sidebar">
+        <div class="brand">CAREER TOOLS</div>
+        <div class="nav-menu">
+            <button class="nav-btn active" id="btn-tab-feature1" onclick="switchTab('feature1')">Verification Watermark</button>
+            <button class="nav-btn" id="btn-tab-feature2" onclick="switchTab('feature2')">Contact Extractor</button>
+            <button class="nav-btn" id="btn-tab-feature3" onclick="switchTab('feature3')">Job Image-to-Text</button>
         </div>
-        <button class="nav-btn active" onclick="switchTab('feature1')" id="nav-feature1">💧 Watermark Generator</button>
-        <button class="nav-btn" onclick="switchTab('feature2')" id="nav-feature2">🔍 Job Application Finder</button>
-    </div>
+    </nav>
 
-    <!-- Main Content -->
-    <div class="main-content">
-        
-        <!-- FEATURE 1: Watermark Generator -->
-        <div id="feature1" class="feature-section">
-            <div class="header">
-                <h2>Watermark & Text Generator</h2>
-                <p style="color: #666; font-size: 0.9rem;">Generate formatted text for job selection proofs.</p>
-            </div>
-
-            <div class="card">
-                <div class="form-group">
-                    <label>Nama Perusahaan</label>
-                    <input type="text" id="companyName" placeholder="Ketik nama perusahaan..." autocomplete="off" oninput="this.value = this.value.trim()">
+    <main class="main-content">
+        <div class="container">
+            
+            <!-- FEATURE 1: WATERMARK -->
+            <section id="feature1" class="feature-section active">
+                <div class="header-title">
+                    <h1>Verification Watermark</h1>
+                    <p>Hasilkan teks verifikasi khusus untuk diletakkan pada dokumen lamaran.</p>
                 </div>
-                
-                <div style="display: flex; gap: 15px;">
-                    <div class="form-group" style="flex: 1;">
-                        <label>Hari dari Sekarang (0 = Hari ini)</label>
-                        <input type="number" id="daysOffset" placeholder="0" min="0" autocomplete="off">
+                <div class="card">
+                    <div class="form-group">
+                        <label>Nama Perusahaan</label>
+                        <input type="text" id="companyName" placeholder="Masukkan Nama Perusahaan Tujuan" autocomplete="off">
                     </div>
-                    <div class="form-group" style="flex: 1;">
-                        <label>Jumlah Duplikasi (Array)</label>
-                        <input type="number" id="duplicateCount" placeholder="1" min="1" autocomplete="off">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div class="form-group">
+                            <label>Hari dari Sekarang (0 = Hari ini)</label>
+                            <input type="number" id="daysOffset" placeholder="0" autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <label>Jumlah Baris Duplikasi</label>
+                            <input type="number" id="duplicateCount" placeholder="1" autocomplete="off">
+                        </div>
                     </div>
+                    <button class="btn-primary" onclick="generateWatermark()">Generate Watermark</button>
                 </div>
 
-                <button class="btn-primary" onclick="generateWatermark()">Generate Output</button>
-
-                <!-- Output Single -->
-                <div class="form-group" style="margin-top: 20px;">
-                    <label>Single Output</label>
-                    <div class="output-box" id="singleOutput">
-                        Hasil akan muncul di sini...
+                <div id="watermarkResult" class="output-container hidden">
+                    <span class="output-label">Teks Tunggal</span>
+                    <div class="output-box" id="singleOutput"></div>
+                    <div class="action-bar">
+                        <button class="btn-secondary" onclick="copyText('singleOutput')">Salin Teks</button>
                     </div>
-                    <button class="btn-copy" onclick="copyText('singleOutput')">Salin Teks</button>
-                </div>
 
-                <!-- Output Array -->
-                <div class="form-group">
-                    <label>Array Output (List)</label>
-                    <div id="arrayOutput" style="max-height: 300px; overflow-y: auto; margin-bottom: 10px;">
-                        <!-- List items will appear here -->
-                    </div>
-                    <button class="btn-copy" onclick="copyArray()">Salin Semua List</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- FEATURE 2: Job Application Finder (SIMPLIFIED) -->
-        <div id="feature2" class="feature-section hidden">
-            <div class="header">
-                <h2>Job Application Finder</h2>
-                <p style="color: #666; font-size: 0.9rem;">Paste job description to find application methods (Email/Link).</p>
-            </div>
-
-            <div class="card">
-                <div class="form-group">
-                    <label>Paste Job Description Here</label>
-                    <textarea id="jobDescription" placeholder="Paste full text of job vacancy here..." autocomplete="off" spellcheck="false"></textarea>
-                </div>
-
-                <button class="btn-primary" onclick="analyzeJob()">Find Application Methods</button>
-
-                <div id="jobResult" class="output-box hidden" style="margin-top: 20px; border-style: solid; background: white;">
-                    <h3 style="margin-bottom: 20px; color: var(--primary-blue);">📬 Application Methods Found</h3>
-                    
-                    <!-- Application Methods Only -->
-                    <div class="application-methods">
-                        <div id="applicationMethodsContent">
-                            <p style="color: #999; font-style: italic;">No application method detected</p>
+                    <div style="margin-top: 40px;">
+                        <span class="output-label">List Duplikasi</span>
+                        <div class="output-box" id="arrayOutput" style="max-height: 300px; overflow-y: auto;"></div>
+                        <div class="action-bar">
+                            <button class="btn-secondary" onclick="copyList('arrayOutput')">Salin Semua List</button>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
+            </section>
 
-    </div>
+            <!-- FEATURE 2: CONTACT EXTRACTOR -->
+            <section id="feature2" class="feature-section">
+                <div class="header-title">
+                    <h1>Contact & Link Extractor</h1>
+                    <p>Ekstrak kontak (Email & Link) secara akurat dari teks atau dokumen.</p>
+                </div>
+                <div class="card">
+                    <div class="form-group">
+                        <label>Input Teks Deskripsi</label>
+                        <textarea id="jobDescription" placeholder="Tempel detail lowongan di sini..." autocomplete="off"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Atau Unggah Gambar/PDF Iklan</label>
+                        <div class="file-upload-wrapper">
+                            <div class="file-info" id="fileNameExtractor">Pilih atau Seret file ke sini</div>
+                            <input type="file" id="fileExtractor" accept="image/*,application/pdf" onchange="handleFile(this, 'fileNameExtractor')">
+                        </div>
+                    </div>
+                    <button class="btn-primary" id="btnExtract" onclick="runExtraction()">
+                        <span class="btn-text">Mulai Ekstraksi Kontak</span>
+                    </button>
+                </div>
+
+                <div id="jobResult" class="output-container hidden">
+                    <div id="extractorContent"></div>
+                </div>
+            </section>
+
+            <!-- FEATURE 3: IMAGE TO TEXT -->
+            <section id="feature3" class="feature-section">
+                <div class="header-title">
+                    <h1>Job Image-to-Text</h1>
+                    <p>Konversi foto lowongan kerja menjadi teks detail tanpa mengubah karakter asli.</p>
+                </div>
+                <div class="card">
+                    <div class="form-group">
+                        <label>Unggah Gambar/PDF Dokumen</label>
+                        <div class="file-upload-wrapper">
+                            <div class="file-info" id="fileNameOCR">Pilih atau Seret file ke sini</div>
+                            <input type="file" id="fileOCR" accept="image/*,application/pdf" onchange="handleFile(this, 'fileNameOCR')">
+                        </div>
+                    </div>
+                    <button class="btn-primary" id="btnOCR" onclick="runOCR()">
+                        <span class="btn-text">Proses Scan Teks</span>
+                    </button>
+                </div>
+
+                <div id="ocrResult" class="output-container hidden">
+                    <span class="output-label">Hasil Scan (Case Sensitive)</span>
+                    <div class="output-box" id="ocrOutput" style="max-height: 500px; overflow-y: auto;"></div>
+                    <div class="action-bar">
+                        <button class="btn-secondary" onclick="copyText('ocrOutput')">Salin Hasil Scan</button>
+                        <button class="btn-secondary" onclick="resetOCR()">Bersihkan</button>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
 
     <script>
-        // Global variables to store emails and links
-        let extractedEmails = [];
-        let extractedLinks = [];
+        const apiKey = ""; 
+        let currentFileData = { base64: null, type: null };
 
-        // --- NAVIGATION LOGIC ---
-        function switchTab(featureId) {
-            const sections = document.querySelectorAll('.feature-section');
-            sections.forEach(section => {
-                section.classList.add('hidden');
-            });
-            
-            const navButtons = document.querySelectorAll('.nav-btn');
-            navButtons.forEach(btn => {
-                btn.classList.remove('active');
-            });
-
-            const selectedSection = document.getElementById(featureId);
-            if (selectedSection) {
-                selectedSection.classList.remove('hidden');
-            }
-            
-            const activeButton = document.getElementById('nav-' + featureId);
-            if (activeButton) {
-                activeButton.classList.add('active');
-            }
-
-            clearAllInputs();
+        // Tab Management - In-memory state (Data tidak hilang saat pindah menu)
+        function switchTab(id) {
+            document.querySelectorAll('.feature-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.getElementById('btn-tab-' + id).classList.add('active');
         }
 
-        function clearAllInputs() {
-            document.getElementById('companyName').value = '';
-            document.getElementById('daysOffset').value = '';
-            document.getElementById('duplicateCount').value = '';
-            document.getElementById('singleOutput').innerText = 'Hasil akan muncul di sini...';
-            document.getElementById('arrayOutput').innerHTML = '';
-            document.getElementById('jobDescription').value = '';
-            document.getElementById('jobResult').classList.add('hidden');
-            extractedEmails = [];
-            extractedLinks = [];
+        function handleFile(input, displayId) {
+            const file = input.files[0];
+            if (!file) return;
+            document.getElementById(displayId).innerText = `File terpilih: ${file.name}`;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                currentFileData.base64 = e.target.result.split(',')[1];
+                currentFileData.type = file.type;
+            };
+            reader.readAsDataURL(file);
         }
 
-        // --- FEATURE 1 LOGIC ---
+        // --- FEATURE 1: WATERMARK ---
         function generateWatermark() {
-            let company = document.getElementById('companyName').value.trim().toUpperCase();
-            let daysInput = document.getElementById('daysOffset').value.trim();
-            let countInput = document.getElementById('duplicateCount').value.trim();
-            const fixedText = "DIUNGGAH UNTUK SELEKSI KERJA";
+            const rawCompany = document.getElementById('companyName').value.trim();
+            if (!rawCompany) return showToast("Mohon isi nama perusahaan");
 
-            if (!company) {
-                alert("Mohon isi Nama Perusahaan");
-                return;
+            const company = rawCompany.toUpperCase();
+            const offset = parseInt(document.getElementById('daysOffset').value) || 0;
+            const count = parseInt(document.getElementById('duplicateCount').value) || 1;
+
+            const d = new Date();
+            d.setDate(d.getDate() + offset);
+            const dateStr = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
+            const text = `DIUNGGAH UNTUK SELEKSI KERJA ${company} ${dateStr}`;
+
+            document.getElementById('singleOutput').innerText = text;
+            const listOutput = document.getElementById('arrayOutput');
+            listOutput.innerHTML = '';
+            for(let i=0; i<count; i++) {
+                const item = document.createElement('div');
+                item.style.marginBottom = "4px";
+                item.innerText = text;
+                listOutput.appendChild(item);
             }
-
-            let days = daysInput === '' ? 0 : parseInt(daysInput);
-            let count = countInput === '' ? 1 : parseInt(countInput);
-
-            if (isNaN(days)) days = 0;
-            if (isNaN(count) || count < 1) count = 1;
-
-            const date = new Date();
-            date.setDate(date.getDate() + days);
             
-            const options = { day: 'numeric', month: 'long', year: 'numeric' };
-            const dateString = date.toLocaleDateString('id-ID', options).toUpperCase();
+            document.getElementById('watermarkResult').classList.remove('hidden');
+        }
 
-            const finalString = `${fixedText} ${company} ${dateString}`;
+        // --- FEATURE 2: EXTRACTOR ---
+        async function runExtraction() {
+            const textInput = document.getElementById('jobDescription').value.trim();
+            if (!textInput && !currentFileData.base64) return showToast("Input teks atau file tidak ditemukan");
 
-            document.getElementById('singleOutput').innerText = finalString;
+            setLoading('btnExtract', true);
+            try {
+                let finalTeks = textInput;
+                if (currentFileData.base64) {
+                    finalTeks = await geminiCall("OCR TASK: Transcribe all text from the image/pdf. Keep the original case sensitivity strictly. Do not modify or correct any character case.", currentFileData);
+                }
+                
+                // Case sensitive extraction
+                const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/g;
+                const linkRegex = /((?:https?:\/\/|www\.)[^\s<>"',()]+|(?:\b[a-zA-Z0-9-]+\.(?:ly|ee|com|net|id|me|link|info|be|gl|co|site|online)\/[^\s<>"',()]+))/gi;
+                const waRegex = /(\+?62[\s-]?\d{8,15}|08\d{8,13}|wa\.me\/\d+|whatsapp\.com\/\d+)/g;
 
-            const arrayContainer = document.getElementById('arrayOutput');
-            arrayContainer.innerHTML = '';
+                const emails = [...new Set(finalTeks.match(emailRegex) || [])];
+                const links = [...new Set((finalTeks.match(linkRegex) || []).map(l => l.replace(/[.,]$/, "")))];
+                const was = [...new Set(finalTeks.match(waRegex) || [])];
 
-            for (let i = 0; i < count; i++) {
-                const div = document.createElement('div');
-                div.className = 'result-item';
-                div.innerText = finalString;
-                arrayContainer.appendChild(div);
+                const container = document.getElementById('extractorContent');
+                container.innerHTML = '';
+                
+                if (emails.length) renderRes(container, "📧 Email Terdeteksi (Case Sensitive)", emails);
+                if (links.length) renderRes(container, "🔗 Link Terdeteksi", links, true);
+                if (was.length) renderRes(container, "💬 Kontak WhatsApp", was);
+                
+                if (!emails.length && !links.length && !was.length) {
+                    container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted)">Data tidak ditemukan.</div>';
+                }
+                document.getElementById('jobResult').classList.remove('hidden');
+            } catch (e) {
+                showToast("Gagal melakukan ekstraksi.");
+            } finally {
+                setLoading('btnExtract', false);
             }
         }
 
-        function copyText(elementId) {
-            const text = document.getElementById(elementId).innerText;
-            if (text === 'Hasil akan muncul di sini...') {
-                alert("Generate output terlebih dahulu!");
-                return;
-            }
-            navigator.clipboard.writeText(text).then(() => alert("Teks berhasil disalin!"));
-        }
-
-        function copyArray() {
-            const items = document.querySelectorAll('#arrayOutput .result-item');
-            if (items.length === 0) {
-                alert("Generate output terlebih dahulu!");
-                return;
-            }
-            const textArray = [];
+        function renderRes(parent, title, items, isLink = false) {
+            const div = document.createElement('div');
+            div.style.cssText = "background:#fff; border:1px solid var(--border); border-radius:8px; padding:20px; margin-bottom:16px;";
+            div.innerHTML = `<div style="font-weight:700; font-size:12px; color:var(--primary); margin-bottom:12px; text-transform:uppercase;">${title}</div>`;
             items.forEach(item => {
-                textArray.push(item.innerText);
+                const el = document.createElement(isLink ? 'a' : 'div');
+                if(isLink) {
+                    el.href = item.startsWith('http') ? item : 'https://' + item;
+                    el.target = "_blank";
+                    el.style.color = "var(--primary)";
+                }
+                el.innerText = item;
+                el.style.display = "block";
+                el.style.marginBottom = "6px";
+                el.style.wordBreak = "break-all";
+                div.appendChild(el);
             });
-            const fullText = textArray.join('\n');
-            navigator.clipboard.writeText(fullText).then(() => alert("Semua list berhasil disalin!"));
+            parent.appendChild(div);
         }
 
-        // --- FEATURE 2 LOGIC (SIMPLIFIED) ---
-        function analyzeJob() {
-            const text = document.getElementById('jobDescription').value;
-            const resultBox = document.getElementById('jobResult');
+        // --- FEATURE 3: OCR ---
+        async function runOCR() {
+            if (!currentFileData.base64) return showToast("Unggah file terlebih dahulu");
 
-            if (!text.trim()) {
-                alert("Mohon paste job description terlebih dahulu.");
-                return;
+            setLoading('btnOCR', true);
+            try {
+                const prompt = "TRANSCRIPTION TASK: Read and output all text exactly as written. DO NOT change character casing. Maintain full case sensitivity as seen in the source document. Raw text only.";
+                const result = await geminiCall(prompt, currentFileData);
+                document.getElementById('ocrOutput').innerText = result;
+                document.getElementById('ocrResult').classList.remove('hidden');
+            } catch (e) {
+                showToast("Gagal memproses gambar.");
+            } finally {
+                setLoading('btnOCR', false);
             }
-
-            resultBox.classList.remove('hidden');
-
-            // Extract emails and links only
-            const emails = extractAllEmails(text);
-            const links = extractAllLinks(text);
-
-            displayApplicationMethods(emails, links);
         }
 
-        function extractAllEmails(text) {
-            const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/g;
-            const emails = text.match(emailRegex);
-            
-            if (emails && emails.length > 0) {
-                extractedEmails = [...new Set(emails)];
-                return extractedEmails;
-            }
-            
-            extractedEmails = [];
-            return null;
+        function resetOCR() {
+            document.getElementById('ocrOutput').innerText = '';
+            document.getElementById('ocrResult').classList.add('hidden');
         }
 
-        function extractAllLinks(text) {
-            const linkRegex = /(https?:\/\/[^\s<>"']+)/g;
-            const links = text.match(linkRegex);
-            
-            if (links && links.length > 0) {
-                const filtered = links.filter(l => !l.match(/\.(jpg|jpeg|png|gif|svg)$/i));
-                extractedLinks = [...new Set(filtered)];
-                return extractedLinks;
-            }
-            
-            extractedLinks = [];
-            return null;
-        }
-
-        function displayApplicationMethods(emails, links) {
-            const container = document.getElementById('applicationMethodsContent');
-            let html = '';
-            let hasContent = false;
-
-            // EMAIL SECTION
-            if (emails && emails.length > 0) {
-                hasContent = true;
-                html += `
-                    <div class="method-section">
-                        <div class="method-section-title">📧 EMAIL</div>
-                        <div class="method-list">
-                `;
-                
-                emails.forEach((email, index) => {
-                    html += `
-                        <div class="method-item email">
-                            <span class="email-address">${email}</span>
-                        </div>
-                    `;
-                });
-                
-                html += `
-                        </div>
-                        <button class="btn-copy-small" onclick="copyAllEmails()">Salin Semua Email (TEXTJOIN)</button>
-                    </div>
-                `;
+        // --- API CORE ---
+        async function geminiCall(prompt, fileData) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            const parts = [{ text: prompt }];
+            if (fileData?.base64) {
+                parts.push({ inlineData: { mimeType: fileData.type, data: fileData.base64 } });
             }
 
-            // LINK SECTION
-            if (links && links.length > 0) {
-                hasContent = true;
-                html += `
-                    <div class="method-section">
-                        <div class="method-section-title">🔗 LINK / WEBSITE</div>
-                        <div class="method-list">
-                `;
-                
-                links.forEach((link, index) => {
-                    html += `
-                        <div class="method-item link">
-                            <a href="${link}" target="_blank">${link}</a>
-                        </div>
-                    `;
-                });
-                
-                html += `
-                        </div>
-                    </div>
-                `;
-            }
-
-            // WHATSAPP SECTION (if no email or link)
-            if (!emails && !links) {
-                const waMatch = text.match(/(wa\.me\/\d+|whatsapp\.com\/\d+|\+?\d{1,3}[\s-]?\d{8,12})/g);
-                if (waMatch) {
-                    hasContent = true;
-                    const unique = [...new Set(waMatch)];
-                    html += `
-                        <div class="method-section">
-                            <div class="method-section-title">📱 WHATSAPP</div>
-                            <div class="method-list">
-                    `;
-                    unique.forEach((wa, index) => {
-                        html += `
-                            <div class="method-item">
-                                <span style="color: var(--success-green); font-weight: bold;">${wa}</span>
-                            </div>
-                        `;
+            for (let i = 0; i < 5; i++) {
+                try {
+                    const res = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ contents: [{ parts }] })
                     });
-                    html += `
-                            </div>
-                        </div>
-                    `;
+                    const data = await res.json();
+                    return data.candidates[0].content.parts[0].text;
+                } catch (e) {
+                    await new Promise(r => setTimeout(r, Math.pow(2, i) * 1000));
                 }
             }
-
-            if (!hasContent) {
-                html = '<p style="color: #999; font-style: italic;">No application method detected. Please check the job description manually.</p>';
-            }
-
-            container.innerHTML = html;
+            throw new Error("Gagal menghubungi AI");
         }
 
-        // Copy all emails joined with comma (TEXTJOIN style) - SIMPLE NOTIFICATION
-        function copyAllEmails() {
-            if (extractedEmails.length === 0) {
-                alert("Tidak ada email yang ditemukan!");
-                return;
+        // --- UTILITIES ---
+        function setLoading(btnId, isLoading) {
+            const btn = document.getElementById(btnId);
+            const span = btn.querySelector('.btn-text');
+            btn.disabled = isLoading;
+            if (isLoading) {
+                span.innerHTML = '<span class="loader"></span> Memproses...';
+            } else {
+                span.innerText = btnId === 'btnOCR' ? 'Proses Scan Teks' : 'Mulai Ekstraksi Kontak';
             }
-            
-            // Join with comma, no space (like TEXTJOIN)
-            const emailsText = extractedEmails.join(',');
-            navigator.clipboard.writeText(emailsText).then(() => {
-                alert("Email berhasil disalin!");
-            });
         }
 
-        // Initialize
-        window.onload = function() {
-            document.getElementById('feature1').classList.remove('hidden');
-            document.getElementById('feature2').classList.add('hidden');
-            document.getElementById('nav-feature1').classList.add('active');
-            document.getElementById('nav-feature2').classList.remove('active');
-            clearAllInputs();
-        };
+        function copyText(id) { executeCopy(document.getElementById(id).innerText); }
+        function copyList(id) {
+            const lines = Array.from(document.querySelectorAll(`#${id} div`)).map(d => d.innerText);
+            executeCopy(lines.join('\n'));
+        }
 
+        function executeCopy(val) {
+            const buf = document.getElementById('copyBuffer');
+            buf.value = val;
+            buf.select();
+            document.execCommand('copy');
+            showToast("Berhasil disalin!");
+        }
+
+        function showToast(m) {
+            const t = document.createElement('div');
+            t.innerText = m;
+            t.style.cssText = `position:fixed; bottom:30px; right:30px; background:#1e293b; color:#fff; padding:12px 24px; border-radius:8px; font-size:13px; z-index:9999;`;
+            document.body.appendChild(t);
+            setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 500); }, 2000);
+        }
     </script>
 </body>
 </html>
