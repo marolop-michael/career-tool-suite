@@ -33,6 +33,7 @@
             overflow-x: hidden;
         }
 
+        /* Sidebar - Fixed for Desktop, Relative for Mobile */
         .sidebar {
             width: var(--sidebar-width);
             background-color: var(--sidebar-bg);
@@ -40,11 +41,10 @@
             display: flex;
             flex-direction: column;
             position: fixed;
-            top: 0;
-            left: 0;
-            bottom: 0;
+            height: 100vh;
             padding: 32px 16px;
             z-index: 100;
+            transition: transform 0.3s ease;
         }
 
         .brand {
@@ -53,6 +53,7 @@
             font-weight: 800;
             color: var(--primary);
             letter-spacing: -0.025em;
+            text-transform: uppercase;
         }
 
         .nav-menu {
@@ -78,24 +79,31 @@
             gap: 12px;
         }
 
+        .nav-btn:hover {
+            background-color: #f8fafc;
+            color: var(--text-main);
+        }
+
         .nav-btn.active {
             background-color: #eff6ff;
             color: var(--primary);
             font-weight: 600;
         }
 
+        /* Layout Area - Adjusts based on sidebar width */
         .main-content {
             margin-left: var(--sidebar-width);
             flex: 1;
-            padding: 60px 40px;
+            padding: 40px;
             display: flex;
             justify-content: center;
-            min-width: 0;
+            min-width: 0; /* Prevent flex-item from overflowing */
         }
 
         .container {
             width: 100%;
-            max-width: 800px;
+            max-width: 850px;
+            transition: all 0.3s ease;
         }
 
         .feature-section {
@@ -104,17 +112,17 @@
 
         .feature-section.active {
             display: block;
-            animation: fadeIn 0.3s ease-in-out;
+            animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .header-title { margin-bottom: 32px; }
         .header-title h1 { font-size: 1.875rem; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
-        .header-title p { color: var(--text-muted); font-size: 0.95rem; }
+        .header-title p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.5; }
 
         .card {
             background: #ffffff;
@@ -137,6 +145,12 @@
             outline: none;
             background-color: #fff;
             color: var(--text-main);
+            transition: border-color 0.2s;
+        }
+
+        input:focus, textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
         textarea { min-height: 150px; resize: vertical; }
@@ -145,34 +159,48 @@
             position: relative;
             border: 2px dashed var(--border);
             border-radius: 8px;
-            padding: 30px;
+            padding: 40px 20px;
             text-align: center;
             background: #f8fafc;
             cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .file-upload-wrapper:hover {
+            border-color: var(--primary);
+            background: #f1f5f9;
         }
 
         .file-upload-wrapper input[type="file"] {
             position: absolute; width: 100%; height: 100%; top: 0; left: 0; opacity: 0; cursor: pointer;
         }
 
+        .file-info { color: var(--text-muted); font-size: 14px; }
+
         .btn-primary {
             background-color: var(--primary);
             color: #fff; border: none; padding: 14px 32px; border-radius: 8px;
             cursor: pointer; font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 8px;
+            transition: background 0.2s;
         }
 
+        .btn-primary:hover { background-color: var(--primary-hover); }
         .btn-primary:disabled { background-color: #94a3b8; cursor: not-allowed; }
 
         .output-container { margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--border); }
         .output-container.hidden { display: none; }
         
-        .output-label { font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 12px; display: block; text-transform: uppercase; }
+        .output-label { font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 12px; display: block; text-transform: uppercase; letter-spacing: 0.05em; }
         .output-box {
-            background-color: #ffffff; border: 1px solid var(--border); border-radius: 8px;
-            padding: 24px; font-family: 'SFMono-Regular', Consolas, monospace;
+            background-color: #f8fafc; border: 1px solid var(--border); border-radius: 8px;
+            padding: 24px; font-family: 'ui-monospace', 'SFMono-Regular', Consolas, monospace;
             font-size: 14px; line-height: 1.7; color: #334155; white-space: pre-wrap;
-            word-break: break-all;
+            word-break: break-word;
         }
+
+        .action-bar { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 12px; }
+        .btn-secondary { background-color: #f1f5f9; color: #475569; border: 1px solid var(--border); padding: 10px 20px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-secondary:hover { background-color: #e2e8f0; }
 
         .loader {
             display: inline-block; width: 18px; height: 18px;
@@ -182,26 +210,39 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        @media (max-width: 900px) {
+        #copyBuffer { position: absolute; left: -9999px; }
+
+        /* Responsive adjustments */
+        @media (max-width: 1024px) {
+            :root { --sidebar-width: 240px; }
+            .main-content { padding: 30px; }
+        }
+
+        @media (max-width: 850px) {
             body { flex-direction: column; }
             .sidebar { 
                 width: 100%; 
                 height: auto; 
                 position: relative; 
                 border-right: none; 
-                border-bottom: 1px solid var(--border);
-                padding: 16px; 
+                border-bottom: 1px solid var(--border); 
+                padding: 20px; 
             }
-            .main-content { margin-left: 0; padding: 24px 16px; }
-            .nav-menu { flex-direction: row; overflow-x: auto; padding-bottom: 8px; }
-            .nav-btn { white-space: nowrap; width: auto; }
-            .brand { padding: 0 0 16px 0; text-align: center; }
+            .brand { padding-bottom: 15px; text-align: center; }
+            .nav-menu { 
+                flex-direction: row; 
+                justify-content: center;
+                overflow-x: auto; 
+                padding-bottom: 5px;
+            }
+            .nav-btn { width: auto; white-space: nowrap; }
+            .main-content { margin-left: 0; padding: 20px; }
         }
     </style>
 </head>
 <body>
 
-    <textarea id="copyBuffer" style="position: absolute; left: -9999px;" aria-hidden="true"></textarea>
+    <textarea id="copyBuffer" aria-hidden="true"></textarea>
 
     <nav class="sidebar">
         <div class="brand">CAREER TOOLS</div>
@@ -219,21 +260,21 @@
             <section id="feature1" class="feature-section active">
                 <div class="header-title">
                     <h1>Verification Watermark</h1>
-                    <p>Hasilkan teks verifikasi khusus untuk diletakkan pada dokumen lamaran.</p>
+                    <p>Hasilkan teks verifikasi khusus untuk diletakkan pada dokumen lamaran guna mencegah penyalahgunaan data.</p>
                 </div>
                 <div class="card">
                     <div class="form-group">
                         <label>Nama Perusahaan</label>
-                        <input type="text" id="companyName" placeholder="Masukkan Nama Perusahaan Tujuan">
+                        <input type="text" id="companyName" placeholder="Contoh: PT Teknologi Maju" autocomplete="off">
                     </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
                         <div class="form-group">
-                            <label>Hari ke Depan (0 = Hari ini)</label>
-                            <input type="number" id="daysOffset" placeholder="0">
+                            <label>Hari dari Sekarang (0 = Hari ini)</label>
+                            <input type="number" id="daysOffset" value="0" min="0">
                         </div>
                         <div class="form-group">
-                            <label>Jumlah Duplikasi</label>
-                            <input type="number" id="duplicateCount" placeholder="1">
+                            <label>Jumlah Baris Duplikasi</label>
+                            <input type="number" id="duplicateCount" value="5" min="1">
                         </div>
                     </div>
                     <button class="btn-primary" onclick="generateWatermark()">Generate Watermark</button>
@@ -242,55 +283,74 @@
                 <div id="watermarkResult" class="output-container hidden">
                     <span class="output-label">Teks Tunggal</span>
                     <div class="output-box" id="singleOutput"></div>
-                    <button class="btn-primary" style="margin-top: 10px;" onclick="copyText('singleOutput')">Salin</button>
+                    <div class="action-bar">
+                        <button class="btn-secondary" onclick="copyText('singleOutput')">Salin Teks</button>
+                    </div>
+
+                    <div style="margin-top: 40px;">
+                        <span class="output-label">List Duplikasi (Untuk Overlay)</span>
+                        <div class="output-box" id="arrayOutput" style="max-height: 300px; overflow-y: auto;"></div>
+                        <div class="action-bar">
+                            <button class="btn-secondary" onclick="copyList('arrayOutput')">Salin Semua List</button>
+                        </div>
+                    </div>
                 </div>
             </section>
 
-            <!-- FEATURE 2: EXTRACTOR -->
+            <!-- FEATURE 2: CONTACT EXTRACTOR -->
             <section id="feature2" class="feature-section">
                 <div class="header-title">
                     <h1>Contact & Link Extractor</h1>
-                    <p>Ekstrak kontak dan link dari gambar lowongan.</p>
+                    <p>Ekstrak Email, Link Form, dan Nomor WhatsApp secara otomatis dari deskripsi atau dokumen gambar/PDF.</p>
                 </div>
                 <div class="card">
                     <div class="form-group">
-                        <label>Unggah Gambar Iklan</label>
+                        <label>Input Teks Deskripsi Lowongan</label>
+                        <textarea id="jobDescription" placeholder="Tempel detail lowongan atau syarat pendaftaran di sini..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Atau Unggah Bukti Iklan (Gambar/PDF)</label>
                         <div class="file-upload-wrapper">
-                            <div id="fileNameExtractor">Pilih file gambar...</div>
-                            <input type="file" id="fileExtractor" accept="image/*" onchange="handleFile(this, 'fileNameExtractor')">
+                            <div class="file-info" id="fileNameExtractor">Klik untuk pilih file atau seret ke sini</div>
+                            <input type="file" id="fileExtractor" accept="image/*,application/pdf" onchange="handleFile(this, 'fileNameExtractor')">
                         </div>
                     </div>
                     <button class="btn-primary" id="btnExtract" onclick="runExtraction()">
-                        <span class="btn-text">Ekstrak Kontak</span>
+                        <span class="btn-text">Mulai Ekstraksi Kontak</span>
                     </button>
                 </div>
+
                 <div id="jobResult" class="output-container hidden">
                     <div id="extractorContent"></div>
                 </div>
             </section>
 
-            <!-- FEATURE 3: OCR -->
+            <!-- FEATURE 3: IMAGE TO TEXT -->
             <section id="feature3" class="feature-section">
                 <div class="header-title">
                     <h1>Job Image-to-Text</h1>
-                    <p>Scan teks dari gambar dengan akurasi tinggi.</p>
+                    <p>Konversi foto poster lowongan menjadi teks digital yang dapat disalin dengan akurasi huruf besar/kecil yang terjaga.</p>
                 </div>
                 <div class="card">
                     <div class="form-group">
-                        <label>Unggah Gambar</label>
+                        <label>Unggah Gambar/PDF Dokumen</label>
                         <div class="file-upload-wrapper">
-                            <div id="fileNameOCR">Pilih file gambar...</div>
-                            <input type="file" id="fileOCR" accept="image/*" onchange="handleFile(this, 'fileNameOCR')">
+                            <div class="file-info" id="fileNameOCR">Klik untuk pilih file atau seret ke sini</div>
+                            <input type="file" id="fileOCR" accept="image/*,application/pdf" onchange="handleFile(this, 'fileNameOCR')">
                         </div>
                     </div>
                     <button class="btn-primary" id="btnOCR" onclick="runOCR()">
-                        <span class="btn-text">Mulai Scan</span>
+                        <span class="btn-text">Proses Scan Teks</span>
                     </button>
                 </div>
+
                 <div id="ocrResult" class="output-container hidden">
-                    <span class="output-label">Hasil Scan</span>
-                    <div class="output-box" id="ocrOutput"></div>
-                    <button class="btn-primary" style="margin-top: 10px;" onclick="copyText('ocrOutput')">Salin Hasil</button>
+                    <span class="output-label">Hasil Transkripsi (Case Sensitive)</span>
+                    <div class="output-box" id="ocrOutput" style="max-height: 500px; overflow-y: auto;"></div>
+                    <div class="action-bar">
+                        <button class="btn-secondary" onclick="copyText('ocrOutput')">Salin Hasil Scan</button>
+                        <button class="btn-secondary" onclick="resetOCR()">Bersihkan</button>
+                    </div>
                 </div>
             </section>
 
@@ -298,112 +358,242 @@
     </main>
 
     <script>
-        const apiKey = ""; // Disediakan oleh environment
-        let currentFileData = { base64: null, type: null };
+        const apiKey = "AIzaSyB7c1TgbjBvR4NxiYKicFMhGkJ0gKDpA10"; 
+        let currentFileData = { base64: null, type: null, feature: null };
 
+        // Tab Management
         function switchTab(id) {
             document.querySelectorAll('.feature-section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             document.getElementById('btn-tab-' + id).classList.add('active');
+            
+            // Reset local file data but keep the preview if any
+            currentFileData.feature = id;
         }
 
+        // Improved File Handling for PDF and Images
         function handleFile(input, displayId) {
             const file = input.files[0];
             if (!file) return;
-            document.getElementById(displayId).innerText = file.name;
+
+            // Validasi file
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+            if (!allowedTypes.includes(file.type)) {
+                return showToast("Format file tidak didukung (Gunakan JPG, PNG, atau PDF)");
+            }
+
+            document.getElementById(displayId).innerText = `File siap: ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+            
             const reader = new FileReader();
             reader.onload = (e) => {
                 currentFileData.base64 = e.target.result.split(',')[1];
                 currentFileData.type = file.type;
             };
+            reader.onerror = () => showToast("Gagal membaca file");
             reader.readAsDataURL(file);
         }
 
+        // --- FEATURE 1: WATERMARK ---
         function generateWatermark() {
-            const company = document.getElementById('companyName').value.toUpperCase();
-            if(!company) return alert("Isi nama perusahaan");
+            const rawCompany = document.getElementById('companyName').value.trim();
+            if (!rawCompany) return showToast("Mohon isi nama perusahaan");
+
+            const company = rawCompany.toUpperCase();
             const offset = parseInt(document.getElementById('daysOffset').value) || 0;
+            const count = parseInt(document.getElementById('duplicateCount').value) || 1;
+
             const d = new Date();
             d.setDate(d.getDate() + offset);
-            const dateStr = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
+            const months = ["JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"];
+            const dateStr = `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
             const text = `DIUNGGAH UNTUK SELEKSI KERJA ${company} ${dateStr}`;
+
             document.getElementById('singleOutput').innerText = text;
+            const listOutput = document.getElementById('arrayOutput');
+            listOutput.innerHTML = '';
+            for(let i=0; i<count; i++) {
+                const item = document.createElement('div');
+                item.style.marginBottom = "6px";
+                item.innerText = text;
+                listOutput.appendChild(item);
+            }
+            
             document.getElementById('watermarkResult').classList.remove('hidden');
+            showToast("Watermark berhasil dibuat");
         }
 
+        // --- FEATURE 2: EXTRACTOR ---
         async function runExtraction() {
-            if (!currentFileData.base64) return alert("Pilih file gambar");
+            const textInput = document.getElementById('jobDescription').value.trim();
+            if (!textInput && !currentFileData.base64) return showToast("Input teks atau file tidak ditemukan");
+
             setLoading('btnExtract', true);
             try {
-                const text = await geminiCall("Extract all emails, WhatsApp numbers, and website links from this image. List them clearly.", currentFileData);
+                let finalTeks = textInput;
+                
+                // Jika ada file, OCR dulu
+                if (currentFileData.base64) {
+                    const ocrPrompt = "Extract all raw text from this document. Keep exactly as it is, especially for emails and URLs. Return only the raw text found.";
+                    finalTeks = await geminiCall(ocrPrompt, currentFileData);
+                }
+                
+                // Regex for contacts
+                const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/g;
+                const linkRegex = /((?:https?:\/\/|www\.)[^\s<>"',()]+|(?:\b[a-zA-Z0-9-]+\.(?:ly|ee|com|net|id|me|link|info|be|gl|co|site|online)\/[^\s<>"',()]+))/gi;
+                const waRegex = /(\+?62[\s-]?\d{8,15}|08\d{8,13}|wa\.me\/\d+|whatsapp\.com\/\d+)/g;
+
+                const emails = [...new Set(finalTeks.match(emailRegex) || [])];
+                const links = [...new Set((finalTeks.match(linkRegex) || []).map(l => l.replace(/[.,]$/, "")))];
+                const was = [...new Set(finalTeks.match(waRegex) || [])];
+
                 const container = document.getElementById('extractorContent');
-                container.innerHTML = `<div class="output-box">${text}</div>`;
+                container.innerHTML = '';
+                
+                if (emails.length) renderRes(container, "📧 Email Terdeteksi", emails);
+                if (links.length) renderRes(container, "🔗 Link / Form Terdeteksi", links, true);
+                if (was.length) renderRes(container, "💬 Kontak WhatsApp", was);
+                
+                if (!emails.length && !links.length && !was.length) {
+                    container.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-muted); border:1px solid var(--border); border-radius:8px;">Kontak tidak ditemukan dalam dokumen ini.</div>';
+                }
+                
                 document.getElementById('jobResult').classList.remove('hidden');
+                showToast("Ekstraksi selesai");
             } catch (e) {
-                alert("Error: " + e.message);
+                showToast(e.message || "Gagal melakukan ekstraksi.");
             } finally {
                 setLoading('btnExtract', false);
             }
         }
 
+        function renderRes(parent, title, items, isLink = false) {
+            const div = document.createElement('div');
+            div.style.cssText = "background:#fff; border:1px solid var(--border); border-radius:8px; padding:20px; margin-bottom:16px; box-shadow:var(--shadow);";
+            div.innerHTML = `<div style="font-weight:700; font-size:12px; color:var(--primary); margin-bottom:12px; text-transform:uppercase;">${title}</div>`;
+            items.forEach(item => {
+                const el = document.createElement(isLink ? 'a' : 'div');
+                if(isLink) {
+                    el.href = item.startsWith('http') ? item : 'https://' + item;
+                    el.target = "_blank";
+                    el.style.color = "var(--primary)";
+                }
+                el.innerText = item;
+                el.style.display = "block";
+                el.style.marginBottom = "8px";
+                el.style.wordBreak = "break-all";
+                el.style.fontSize = "14px";
+                div.appendChild(el);
+            });
+            parent.appendChild(div);
+        }
+
+        // --- FEATURE 3: OCR ---
         async function runOCR() {
-            if (!currentFileData.base64) return alert("Pilih file gambar");
+            if (!currentFileData.base64) return showToast("Unggah file terlebih dahulu");
+
             setLoading('btnOCR', true);
             try {
-                const text = await geminiCall("Transcribe all text from this image exactly as it is. Preserve case sensitivity.", currentFileData);
-                document.getElementById('ocrOutput').innerText = text;
+                const prompt = "TRANSCRIPTION TASK: Perform high-fidelity OCR. Read and output all text exactly as written. DO NOT change character casing (Maintain full case sensitivity). Maintain the logical layout. Output raw text only, no conversational filler.";
+                const result = await geminiCall(prompt, currentFileData);
+                document.getElementById('ocrOutput').innerText = result;
                 document.getElementById('ocrResult').classList.remove('hidden');
+                showToast("Scan teks selesai");
             } catch (e) {
-                alert("Error: " + e.message);
+                showToast(e.message || "Gagal memproses dokumen.");
             } finally {
                 setLoading('btnOCR', false);
             }
         }
 
+        function resetOCR() {
+            document.getElementById('ocrOutput').innerText = '';
+            document.getElementById('ocrResult').classList.add('hidden');
+        }
+
+        // --- API CORE WITH ENHANCED PDF HANDLING ---
         async function geminiCall(prompt, fileData) {
-            // Menggunakan model yang didukung: gemini-2.5-flash-preview-09-2025
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            
+            // Perbaikan: Pastikan mimeType terdeteksi dengan benar untuk PDF
+            const mimeType = fileData.type || (fileData.base64.startsWith('JVBERi') ? 'application/pdf' : 'image/jpeg');
             
             const payload = {
                 contents: [{
                     parts: [
                         { text: prompt },
-                        { inlineData: { mimeType: fileData.type, data: fileData.base64 } }
+                        { inlineData: { mimeType: mimeType, data: fileData.base64 } }
                     ]
                 }]
             };
 
-            for (let i = 0; i < 5; i++) {
+            for (let i = 0; i < 3; i++) { // Retry up to 3 times
                 try {
                     const res = await fetch(url, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
                     });
+                    
                     const data = await res.json();
-                    if (data.error) throw new Error(data.error.message);
+                    
+                    if (data.error) {
+                        throw new Error(data.error.message || "Terjadi kesalahan API");
+                    }
+                    
+                    if (!data.candidates || data.candidates.length === 0) {
+                        throw new Error("AI tidak memberikan respon (Safety block/Empty)");
+                    }
+
                     return data.candidates[0].content.parts[0].text;
                 } catch (e) {
-                    if (i === 4) throw e;
+                    if (i === 2) throw e;
                     await new Promise(r => setTimeout(r, Math.pow(2, i) * 1000));
                 }
             }
         }
 
-        function setLoading(id, isLoading) {
-            const btn = document.getElementById(id);
+        // --- UTILITIES ---
+        function setLoading(btnId, isLoading) {
+            const btn = document.getElementById(btnId);
+            const span = btn.querySelector('.btn-text');
             btn.disabled = isLoading;
-            btn.querySelector('.btn-text').innerHTML = isLoading ? '<span class="loader"></span> Memproses...' : (id === 'btnOCR' ? 'Mulai Scan' : 'Ekstrak Kontak');
+            if (isLoading) {
+                span.innerHTML = '<span class="loader"></span> Memproses AI...';
+            } else {
+                span.innerText = btnId === 'btnOCR' ? 'Proses Scan Teks' : 'Mulai Ekstraksi Kontak';
+            }
         }
 
-        function copyText(id) {
-            const el = document.getElementById(id);
+        function copyText(id) { executeCopy(document.getElementById(id).innerText); }
+        function copyList(id) {
+            const lines = Array.from(document.querySelectorAll(`#${id} div`)).map(d => d.innerText);
+            executeCopy(lines.join('\n'));
+        }
+
+        function executeCopy(val) {
+            if (!val) return;
             const buf = document.getElementById('copyBuffer');
-            buf.value = el.innerText;
+            buf.value = val;
             buf.select();
             document.execCommand('copy');
-            alert("Berhasil disalin!");
+            showToast("Berhasil disalin ke clipboard!");
+        }
+
+        function showToast(m) {
+            const existing = document.querySelector('.toast-msg');
+            if(existing) existing.remove();
+
+            const t = document.createElement('div');
+            t.className = 'toast-msg';
+            t.innerText = m;
+            t.style.cssText = `position:fixed; bottom:30px; right:30px; background:#1e293b; color:#fff; padding:14px 28px; border-radius:10px; font-size:14px; z-index:9999; box-shadow:0 10px 15px -3px rgba(0,0,0,0.2); transition: all 0.3s ease; transform: translateY(0);`;
+            document.body.appendChild(t);
+            setTimeout(() => { 
+                t.style.opacity = '0'; 
+                t.style.transform = 'translateY(20px)';
+                setTimeout(() => t.remove(), 400); 
+            }, 3000);
         }
     </script>
 </body>
