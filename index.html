@@ -141,6 +141,7 @@
             background-color: var(--primary);
             color: #fff; border: none; padding: 14px 32px; border-radius: 8px;
             cursor: pointer; font-weight: 600; font-size: 14px; transition: background 0.2s;
+            width: auto;
         }
 
         .btn-primary:hover { background-color: var(--primary-hover); }
@@ -172,28 +173,46 @@
             background: #f1f5f9; border: 1px solid #cbd5e1; padding: 6px 14px;
             border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; color: #475569;
             transition: all 0.2s;
+            white-space: nowrap;
         }
 
         .btn-copy-small:hover { background: #e2e8f0; border-color: #94a3b8; }
 
         .list-item {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 10px 0; border-bottom: 1px solid #f8fafc;
+            padding: 12px 0; border-bottom: 1px solid #f1f5f9;
+            gap: 12px;
         }
 
         .list-item:last-child { border-bottom: none; }
+        
+        .list-text {
+            font-size: 14px; font-weight: 600; color: #334155; word-break: break-all;
+        }
 
+        /* Responsive Styles */
         @media (max-width: 850px) {
             body { flex-direction: column; }
             .sidebar {
-                width: 100%; height: auto; position: sticky; top: 0; padding: 12px;
-                flex-direction: row; justify-content: space-between; border-right: none; border-bottom: 1px solid var(--border);
+                width: 100%; height: auto; position: sticky; top: 0; padding: 8px 16px;
+                flex-direction: row; justify-content: space-between; align-items: center;
+                border-right: none; border-bottom: 1px solid var(--border);
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(8px);
             }
-            .brand { padding: 0; margin-bottom: 0; font-size: 1rem; }
-            .nav-menu { flex-direction: row; gap: 4px; }
-            .nav-btn { padding: 10px 12px; font-size: 13px; width: auto; }
-            .main-content { margin-left: 0; padding: 16px; }
+            .brand { padding: 0; margin-bottom: 0; font-size: 0.875rem; min-width: max-content; }
+            .nav-menu { flex-direction: row; gap: 4px; overflow-x: auto; padding-bottom: 0; }
+            .nav-btn { padding: 8px 12px; font-size: 12px; width: auto; gap: 6px; }
+            .main-content { margin-left: 0; padding: 20px 16px; }
             .card { padding: 20px; }
+            .btn-primary { width: 100%; }
+            .header-title h1 { font-size: 1.5rem; }
+            
+            /* Responsive Grid Watermark */
+            .grid-responsive {
+                grid-template-columns: 1fr !important;
+                gap: 10px !important;
+            }
         }
 
         #copyBuffer { position: absolute; left: -9999px; opacity: 0; pointer-events: none; }
@@ -225,14 +244,14 @@
                         <label>Nama Perusahaan</label>
                         <input type="text" id="companyName" placeholder="Masukkan Nama Perusahaan" autocomplete="off">
                     </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;" class="grid-responsive">
                         <div class="form-group">
                             <label>Hari dari Sekarang (0 = Hari ini)</label>
-                            <input type="number" id="daysOffset" placeholder="Masukkan Angka Hari">
+                            <input type="number" id="daysOffset" placeholder="0">
                         </div>
                         <div class="form-group">
                             <label>Jumlah Baris Duplikasi</label>
-                            <input type="number" id="duplicateCount" placeholder="Masukkan Jumlah Baris">
+                            <input type="number" id="duplicateCount" placeholder="3">
                         </div>
                     </div>
                     <button class="btn-primary" onclick="generateWatermark()">Buat Teks Watermark</button>
@@ -332,37 +351,56 @@
             container.innerHTML = '';
             let foundAny = false;
 
+            // Render Section: Alamat Email
             if (emails.length > 0) {
                 foundAny = true;
-                const group = createResultGroup("📧 Alamat Email", emails.join(', '));
-                const listDiv = document.createElement('div');
-                listDiv.className = 'output-box';
-                listDiv.innerText = emails.join('\n');
-                group.appendChild(listDiv);
+                const group = createResultGroup("📧 Alamat Email", emails.join(','));
+                emails.forEach(email => {
+                    const item = document.createElement('div');
+                    item.className = 'list-item';
+                    item.innerHTML = `
+                        <span class="list-text">${email}</span>
+                        <button class="btn-copy-small">Salin</button>
+                    `;
+                    item.querySelector('button').onclick = (e) => {
+                        executeCopy(email);
+                        const btn = e.target;
+                        const originalText = btn.innerText;
+                        btn.innerText = "Tersalin";
+                        setTimeout(() => btn.innerText = originalText, 1500);
+                    };
+                    group.appendChild(item);
+                });
                 container.appendChild(group);
             }
 
+            // Render Section: Link / Website
             if (cleanLinks.length > 0) {
                 foundAny = true;
                 const group = createResultGroup("🔗 Link / Website");
-                const listDiv = document.createElement('div');
                 cleanLinks.forEach(link => {
                     const href = link.toLowerCase().startsWith('http') ? link : 
                                 link.toLowerCase().startsWith('www.') ? 'https://' + link : 
                                 'https://' + link;
-                    const a = document.createElement('a');
-                    a.href = href;
-                    a.target = "_blank";
-                    a.innerText = link;
-                    a.style.cssText = "display:block; margin-bottom:10px; color:var(--primary); font-size:14px; word-break:break-all; text-decoration:none; font-weight:500;";
-                    a.onmouseover = () => a.style.textDecoration = "underline";
-                    a.onmouseout = () => a.style.textDecoration = "none";
-                    listDiv.appendChild(a);
+                    const item = document.createElement('div');
+                    item.className = 'list-item';
+                    item.innerHTML = `
+                        <a href="${href}" target="_blank" class="list-text" style="color:var(--primary); text-decoration:none;">${link}</a>
+                        <button class="btn-copy-small">Salin</button>
+                    `;
+                    item.querySelector('button').onclick = (e) => {
+                        executeCopy(link);
+                        const btn = e.target;
+                        const originalText = btn.innerText;
+                        btn.innerText = "Tersalin";
+                        setTimeout(() => btn.innerText = originalText, 1500);
+                    };
+                    group.appendChild(item);
                 });
-                group.appendChild(listDiv);
                 container.appendChild(group);
             }
 
+            // Render Section: WhatsApp / Telp
             if (processedPhones.length > 0) {
                 foundAny = true;
                 const group = createResultGroup("📞 Nomor WhatsApp / Telp");
@@ -370,7 +408,7 @@
                     const item = document.createElement('div');
                     item.className = 'list-item';
                     item.innerHTML = `
-                        <span style="font-size: 14px; font-weight:600; color:#334155;">${num}</span>
+                        <span class="list-text">${num}</span>
                         <button class="btn-copy-small">Salin</button>
                     `;
                     item.querySelector('button').onclick = (e) => {
