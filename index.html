@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Career Tool Suite - Professional Edition</title>
+    <title>Career Tool Suite - Responsive Edition</title>
     <style>
         :root {
             --primary: #2563eb;
@@ -29,12 +29,12 @@
             background-color: var(--bg-main);
             color: var(--text-main);
             min-height: 100vh;
-            overflow-x: hidden;
+            flex-direction: row;
         }
 
-        /* Sidebar Navigation */
+        /* Sidebar Navigation - Desktop Default */
         .sidebar {
-            width: 280px;
+            width: 260px;
             background-color: var(--sidebar-bg);
             border-right: 1px solid var(--border);
             display: flex;
@@ -43,11 +43,12 @@
             height: 100vh;
             padding: 32px 16px;
             z-index: 100;
+            transition: all 0.3s ease;
         }
 
         .brand {
             padding: 0 12px 32px;
-            font-size: 1.25rem;
+            font-size: 1.2rem;
             font-weight: 800;
             color: var(--primary);
             letter-spacing: -0.025em;
@@ -71,7 +72,7 @@
             font-weight: 500;
             color: var(--text-muted);
             border-radius: var(--radius);
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.2s;
             display: flex;
             align-items: center;
             gap: 12px;
@@ -90,12 +91,13 @@
 
         /* Main Content Area */
         .main-content {
-            margin-left: 280px;
+            margin-left: 260px; /* Lebar sidebar desktop */
             flex: 1;
-            padding: 60px 40px;
+            padding: 40px 20px;
             display: flex;
             justify-content: center;
             min-height: 100vh;
+            transition: margin-left 0.3s ease;
         }
 
         .container {
@@ -117,32 +119,31 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .header-title { margin-bottom: 32px; }
-        .header-title h1 { font-size: 1.875rem; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
-        .header-title p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.5; }
+        .header-title { margin-bottom: 24px; }
+        .header-title h1 { font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
+        .header-title p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; }
 
         .card {
             background: #ffffff;
             border-radius: var(--radius);
-            padding: 32px;
+            padding: 24px;
             border: 1px solid var(--border);
             box-shadow: var(--shadow);
             margin-bottom: 24px;
         }
 
-        .form-group { margin-bottom: 24px; }
-        label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: var(--text-main); }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 13px; color: var(--text-main); }
 
         input[type="text"], input[type="number"], textarea {
             width: 100%;
-            padding: 14px 16px;
+            padding: 12px 14px;
             border: 1px solid var(--border);
             border-radius: 8px;
             font-size: 15px;
             outline: none;
             background-color: #fff;
             color: var(--text-main);
-            transition: border-color 0.2s, box-shadow 0.2s;
         }
 
         input:focus, textarea:focus {
@@ -150,106 +151,96 @@
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
-        textarea { min-height: 160px; resize: vertical; line-height: 1.6; }
+        .grid-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
 
         .btn-primary {
+            width: auto;
             background-color: var(--primary);
-            color: #fff; border: none; padding: 14px 32px; border-radius: 8px;
+            color: #fff; border: none; padding: 14px 28px; border-radius: 8px;
             cursor: pointer; font-weight: 600; font-size: 14px; 
-            display: inline-flex; align-items: center; gap: 8px;
-            transition: background-color 0.2s, transform 0.1s;
+            transition: background-color 0.2s;
         }
 
         .btn-primary:hover { background-color: var(--primary-hover); }
-        .btn-primary:active { transform: scale(0.98); }
-        .btn-primary:disabled { background-color: #94a3b8; cursor: not-allowed; transform: none; }
 
-        .output-container { 
-            margin-top: 40px; 
-            padding-top: 32px; 
-            border-top: 1px solid var(--border); 
-        }
-        
+        /* Output Styling */
+        .output-container { margin-top: 32px; border-top: 1px solid var(--border); padding-top: 24px; }
         .output-container.hidden { display: none; }
-        
-        .output-label { 
-            font-size: 11px; 
-            font-weight: 700; 
-            color: var(--text-muted); 
-            margin-bottom: 12px; 
-            display: block; 
-            text-transform: uppercase; 
-            letter-spacing: 0.05em;
-        }
-
+        .output-label { font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 10px; display: block; text-transform: uppercase; }
         .output-box {
-            background-color: #ffffff; 
-            border: 1px solid var(--border); 
-            border-radius: 8px;
-            padding: 24px; 
-            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-            font-size: 14px; 
-            line-height: 1.7; 
-            color: #334155; 
-            white-space: pre-wrap;
-            word-break: break-all;
+            background-color: #f8fafc; border: 1px solid var(--border); border-radius: 8px;
+            padding: 20px; font-family: monospace; font-size: 13px; color: #334155; 
+            white-space: pre-wrap; word-break: break-all;
         }
 
-        .action-bar { margin-top: 16px; display: flex; gap: 12px; flex-wrap: wrap; }
-        
-        .btn-secondary { 
-            background-color: #f1f5f9; 
-            color: #475569; 
-            border: 1px solid var(--border); 
-            padding: 10px 20px; 
-            border-radius: 6px; 
-            font-size: 13px; 
-            font-weight: 600; 
-            cursor: pointer;
-            transition: all 0.2s;
+        .btn-secondary { background: #f1f5f9; border: 1px solid var(--border); padding: 8px 16px; border-radius: 6px; font-size: 12px; cursor: pointer; margin-top: 10px; }
+
+        /* Mobile Responsive Adjustments */
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                padding: 20px 16px;
+            }
+
+            .brand { padding: 0 0 16px 4px; font-size: 1.1rem; }
+
+            .nav-menu {
+                flex-direction: row;
+                overflow-x: auto;
+                gap: 4px;
+                scrollbar-width: none; /* Hide scrollbar Firefox */
+            }
+            .nav-menu::-webkit-scrollbar { display: none; } /* Hide scrollbar Chrome/Safari */
+
+            .nav-btn {
+                white-space: nowrap;
+                padding: 10px 14px;
+                font-size: 13px;
+                justify-content: center;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 24px 16px;
+            }
+
+            .grid-inputs {
+                grid-template-columns: 1fr; /* Tumpuk input di mobile */
+            }
+
+            .header-title h1 { font-size: 1.3rem; }
+            .btn-primary { width: 100%; } /* Tombol lebar penuh di mobile */
         }
 
-        .btn-secondary:hover { background-color: #e2e8f0; color: var(--text-main); }
-
-        .loader {
-            display: inline-block; width: 16px; height: 16px;
-            border: 2px solid rgba(255,255,255,0.3); border-radius: 50%;
-            border-top-color: #fff; animation: spin 0.8s linear infinite;
-        }
-
+        #copyBuffer { position: absolute; left: -9999px; opacity: 0; }
+        .loader { width: 14px; height: 14px; border: 2px solid #fff; border-top: 2px solid transparent; border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; margin-right: 8px; }
         @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* Copy Buffer Helper */
-        #copyBuffer { position: absolute; left: -9999px; top: 0; opacity: 0; }
-
-        /* Responsive UI */
-        @media (max-width: 900px) {
-            .sidebar { width: 100%; height: auto; position: relative; border-right: none; padding: 16px; }
-            .main-content { margin-left: 0; padding: 24px; }
-            .nav-menu { flex-direction: row; overflow-x: auto; padding-bottom: 8px; }
-            .nav-btn { white-space: nowrap; width: auto; }
-        }
-        
-        @media (max-width: 640px) {
-            .grid-mobile-1 { grid-template-columns: 1fr !important; }
-        }
     </style>
 </head>
 <body>
 
-    <!-- Buffer area for copy operations -->
-    <textarea id="copyBuffer" aria-hidden="true" tabindex="-1"></textarea>
+    <textarea id="copyBuffer" aria-hidden="true"></textarea>
 
-    <!-- Sidebar Navigation -->
+    <!-- Navigation Area -->
     <nav class="sidebar">
         <div class="brand">CAREER TOOLS</div>
         <div class="nav-menu">
-            <button class="nav-btn active" id="btn-tab-feature1" onclick="switchTab('feature1')">Verification Watermark</button>
-            <button class="nav-btn" id="btn-tab-feature2" onclick="switchTab('feature2')">Contact Extractor</button>
+            <button class="nav-btn active" id="btn-tab-feature1" onclick="switchTab('feature1')">Watermark</button>
+            <button class="nav-btn" id="btn-tab-feature2" onclick="switchTab('feature2')">Extractor</button>
         </div>
     </nav>
 
-    <!-- Main Content -->
+    <!-- Content Area -->
     <main class="main-content">
         <div class="container">
             
@@ -257,21 +248,21 @@
             <section id="feature1" class="feature-section active">
                 <div class="header-title">
                     <h1>Verification Watermark</h1>
-                    <p>Hasilkan teks verifikasi khusus untuk diletakkan pada dokumen lamaran agar lebih aman dan profesional.</p>
+                    <p>Hasilkan teks verifikasi khusus agar dokumen lamaran Anda lebih aman.</p>
                 </div>
                 <div class="card">
                     <div class="form-group">
                         <label>Nama Perusahaan</label>
-                        <input type="text" id="companyName" placeholder="Masukkan Nama Perusahaan" autocomplete="off">
+                        <input type="text" id="companyName" placeholder="Masukkan Nama Perusahaan Tujuan" autocomplete="off">
                     </div>
-                    <div class="grid-mobile-1" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="grid-inputs">
                         <div class="form-group">
                             <label>Hari dari Sekarang (0 = Hari ini)</label>
-                            <input type="number" id="daysOffset" placeholder="0" value="0" min="-365" max="365">
+                            <input type="number" id="daysOffset" placeholder="0">
                         </div>
                         <div class="form-group">
                             <label>Jumlah Baris Duplikasi</label>
-                            <input type="number" id="duplicateCount" placeholder="1" value="1" min="1" max="50">
+                            <input type="number" id="duplicateCount" placeholder="1">
                         </div>
                     </div>
                     <button class="btn-primary" onclick="generateWatermark()">Generate Watermark</button>
@@ -280,41 +271,33 @@
                 <div id="watermarkResult" class="output-container hidden">
                     <span class="output-label">Teks Tunggal</span>
                     <div class="output-box" id="singleOutput"></div>
-                    <div class="action-bar">
-                        <button class="btn-secondary" onclick="copyText('singleOutput')">Salin Teks</button>
-                    </div>
+                    <button class="btn-secondary" onclick="copyId('singleOutput')">Salin Teks</button>
 
-                    <div style="margin-top: 40px;">
+                    <div style="margin-top: 24px;">
                         <span class="output-label">List Duplikasi</span>
-                        <div class="output-box" id="arrayOutput" style="max-height: 300px; overflow-y: auto;"></div>
-                        <div class="action-bar">
-                            <button class="btn-secondary" onclick="copyList('arrayOutput')">Salin Semua List</button>
-                        </div>
+                        <div class="output-box" id="arrayOutput" style="max-height: 200px; overflow-y: auto;"></div>
+                        <button class="btn-secondary" onclick="copyId('arrayOutput')">Salin Semua Baris</button>
                     </div>
                 </div>
             </section>
 
-            <!-- FEATURE 2: CONTACT EXTRACTOR -->
+            <!-- FEATURE 2: EXTRACTOR -->
             <section id="feature2" class="feature-section">
                 <div class="header-title">
-                    <h1>Contact & Link Extractor</h1>
-                    <p>Ekstrak kontak (Email, Link, & WhatsApp) secara otomatis dari teks lowongan kerja.</p>
+                    <h1>Contact Extractor</h1>
+                    <p>Cari email, link, atau WhatsApp dari deskripsi lowongan secara otomatis.</p>
                 </div>
                 <div class="card">
                     <div class="form-group">
-                        <label>Input Teks Deskripsi Lowongan</label>
-                        <textarea id="jobDescription" placeholder="Tempel detail lowongan di sini untuk mencari email atau link pendaftaran..." autocomplete="off"></textarea>
+                        <label>Tempel Teks Lowongan</label>
+                        <textarea id="jobDescription" placeholder="Masukkan detail lowongan di sini..."></textarea>
                     </div>
-                    <button class="btn-primary" id="btnExtract" onclick="runExtraction()">
-                        <span class="btn-text">Mulai Ekstraksi Kontak</span>
-                    </button>
+                    <button class="btn-primary" id="btnExtract" onclick="runExtraction()">Ekstrak Sekarang</button>
                 </div>
 
                 <div id="jobResult" class="output-container hidden">
                     <div id="extractorContent"></div>
-                    <div class="action-bar" style="margin-top: 24px;">
-                        <button class="btn-secondary" onclick="resetExtraction()">Bersihkan Hasil</button>
-                    </div>
+                    <button class="btn-secondary" onclick="resetExtraction()">Bersihkan</button>
                 </div>
             </section>
 
@@ -322,257 +305,107 @@
     </main>
 
     <script>
-        /**
-         * Navigation Logic
-         */
         function switchTab(id) {
             document.querySelectorAll('.feature-section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            
-            const section = document.getElementById(id);
-            const btn = document.getElementById('btn-tab-' + id);
-            
-            if (section && btn) {
-                section.classList.add('active');
-                btn.classList.add('active');
-            }
+            document.getElementById(id).classList.add('active');
+            document.getElementById('btn-tab-' + id).classList.add('active');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        /**
-         * Feature 1: Watermark Logic
-         */
         function generateWatermark() {
             const companyInput = document.getElementById('companyName');
-            const rawCompany = companyInput.value.trim();
-            
-            if (!rawCompany) {
-                showToast("Mohon isi nama perusahaan");
-                companyInput.focus();
-                return;
-            }
+            const company = companyInput.value.trim().toUpperCase();
+            if (!company) { showToast("Isi nama perusahaan!"); companyInput.focus(); return; }
 
-            const company = rawCompany.toUpperCase();
             const offset = parseInt(document.getElementById('daysOffset').value) || 0;
-            const count = Math.min(Math.max(parseInt(document.getElementById('duplicateCount').value) || 1, 1), 100);
+            const count = parseInt(document.getElementById('duplicateCount').value) || 1;
 
             const d = new Date();
             d.setDate(d.getDate() + offset);
+            const dateStr = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
             
-            // Format Indonesia: DD MMMM YYYY
-            const dateStr = d.toLocaleDateString('id-ID', { 
-                day: 'numeric', 
-                month: 'long', 
-                year: 'numeric' 
-            }).toUpperCase();
+            const result = `DIUNGGAH UNTUK SELEKSI KERJA ${company} ${dateStr}`;
             
-            const text = `DIUNGGAH UNTUK SELEKSI KERJA ${company} ${dateStr}`;
-
-            // Single Output
-            document.getElementById('singleOutput').textContent = text;
+            document.getElementById('singleOutput').textContent = result;
             
-            // List Output
-            const listOutput = document.getElementById('arrayOutput');
-            listOutput.innerHTML = '';
-            const fragment = document.createDocumentFragment();
-            
-            for(let i = 0; i < count; i++) {
-                const item = document.createElement('div');
-                item.style.marginBottom = "4px";
-                item.textContent = text;
-                fragment.appendChild(item);
+            let listHtml = "";
+            for(let i=0; i<Math.min(count, 100); i++) {
+                listHtml += `<div>${result}</div>`;
             }
-            listOutput.appendChild(fragment);
-            
+            document.getElementById('arrayOutput').innerHTML = listHtml;
             document.getElementById('watermarkResult').classList.remove('hidden');
         }
 
-        /**
-         * Feature 2: Extractor Logic (Optimized Regex)
-         */
         function runExtraction() {
-            const textArea = document.getElementById('jobDescription');
-            const textInput = textArea.value.trim();
-            
-            if (!textInput) {
-                showToast("Masukkan teks terlebih dahulu");
-                textArea.focus();
-                return;
-            }
+            const text = document.getElementById('jobDescription').value.trim();
+            if (!text) { showToast("Teks kosong!"); return; }
 
-            setLoading('btnExtract', true);
-            
-            // Artificial delay for better UX feel
+            const btn = document.getElementById('btnExtract');
+            btn.innerHTML = '<span class="loader"></span> Memproses...';
+            btn.disabled = true;
+
             setTimeout(() => {
-                try {
-                    // Optimized Email Regex
-                    const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g;
-                    
-                    // Optimized URL Regex (captures modern TLDs and common formats)
-                    const linkRegex = /(https?:\/\/[^\s<>"',()]+|(?:www\.|bit\.ly|forms\.gle|t\.me|linktr\.ee|lynk\.id)\/[^\s<>"',()]+)/gi;
-                    
-                    // Optimized WA/Phone Regex (Indonesian numbers)
-                    const waRegex = /(?:\+?62|0)8[1-9][0-9]{7,11}/g;
+                const emails = [...new Set(text.match(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g) || [])];
+                const links = [...new Set(text.match(/(https?:\/\/[^\s]+|(?:www\.|bit\.ly|forms\.gle)\/[^\s]+)/gi) || [])];
+                const was = [...new Set(text.match(/(?:\+?62|0)8[1-9][0-9]{7,11}/g) || [])];
 
-                    // Data Cleaning (Remove duplicates and trailing punctuation from links)
-                    const emails = [...new Set(textInput.match(emailRegex) || [])];
-                    const rawLinks = textInput.match(linkRegex) || [];
-                    const links = [...new Set(rawLinks.map(l => l.replace(/[.,;!?]$/, "")))];
-                    const was = [...new Set(textInput.match(waRegex) || [])];
-
-                    const container = document.getElementById('extractorContent');
-                    container.innerHTML = '';
-                    
-                    let foundAny = false;
-
-                    if (emails.length) {
-                        renderRes(container, "📧 Email Terdeteksi", emails);
-                        foundAny = true;
-                    }
-                    if (links.length) {
-                        renderRes(container, "🔗 Link Terdeteksi", links, true);
-                        foundAny = true;
-                    }
-                    if (was.length) {
-                        renderRes(container, "💬 Kontak WhatsApp", was);
-                        foundAny = true;
-                    }
-                    
-                    if (!foundAny) {
-                        container.innerHTML = '<div style="text-align:center; padding:40px 20px; color:var(--text-muted); font-size: 14px;">Kontak atau link tidak ditemukan dalam teks tersebut.</div>';
-                    }
-                    
-                    document.getElementById('jobResult').classList.remove('hidden');
-                } catch (e) {
-                    showToast("Gagal memproses teks.");
-                } finally {
-                    setLoading('btnExtract', false);
+                const container = document.getElementById('extractorContent');
+                container.innerHTML = '';
+                
+                if (emails.length) renderBlock(container, "EMAIL", emails);
+                if (links.length) renderBlock(container, "LINK", links);
+                if (was.length) renderBlock(container, "WHATSAPP", was);
+                
+                if (!emails.length && !links.length && !was.length) {
+                    container.innerHTML = '<p style="font-size:13px; color:var(--text-muted)">Tidak ditemukan kontak.</p>';
                 }
-            }, 500);
+
+                document.getElementById('jobResult').classList.remove('hidden');
+                btn.innerHTML = 'Ekstrak Sekarang';
+                btn.disabled = false;
+            }, 600);
         }
 
-        function renderRes(parent, title, items, isLink = false) {
+        function renderBlock(parent, label, items) {
             const div = document.createElement('div');
-            div.style.cssText = "background:#fff; border:1px solid var(--border); border-radius:8px; padding:20px; margin-bottom:16px;";
-            div.innerHTML = `<div style="font-weight:700; font-size:11px; color:var(--primary); margin-bottom:14px; text-transform:uppercase; letter-spacing:0.02em;">${title}</div>`;
-            
+            div.style.marginBottom = "20px";
+            div.innerHTML = `<b style="font-size:11px; color:var(--primary)">${label}</b>`;
             items.forEach(item => {
-                const el = document.createElement(isLink ? 'a' : 'div');
-                if(isLink) {
-                    el.href = item.startsWith('http') ? item : 'https://' + item;
-                    el.target = "_blank";
-                    el.rel = "noopener noreferrer";
-                    el.style.color = "var(--primary)";
-                    el.style.textDecoration = "none";
-                }
-                el.textContent = item;
-                el.style.display = "block";
-                el.style.marginBottom = "8px";
-                el.style.wordBreak = "break-all";
-                el.style.fontSize = "14px";
-                div.appendChild(el);
+                const p = document.createElement('p');
+                p.textContent = item;
+                p.style.fontSize = "14px";
+                p.style.margin = "4px 0";
+                div.appendChild(p);
             });
             parent.appendChild(div);
         }
 
         function resetExtraction() {
-            document.getElementById('extractorContent').innerHTML = '';
             document.getElementById('jobDescription').value = '';
             document.getElementById('jobResult').classList.add('hidden');
-            showToast("Berhasil dibersihkan");
         }
 
-        /**
-         * Global Utilities
-         */
-        function setLoading(btnId, isLoading) {
-            const btn = document.getElementById(btnId);
-            const span = btn.querySelector('.btn-text');
-            btn.disabled = isLoading;
-            if (isLoading) {
-                span.innerHTML = '<span class="loader"></span> Memproses...';
-            } else {
-                span.textContent = 'Mulai Ekstraksi Kontak';
-            }
-        }
-
-        function copyText(id) { 
-            const text = document.getElementById(id).textContent;
-            executeCopy(text); 
-        }
-
-        function copyList(id) {
-            const lines = Array.from(document.querySelectorAll(`#${id} div`)).map(d => d.textContent);
-            executeCopy(lines.join('\n'));
-        }
-
-        async function executeCopy(val) {
+        async function copyId(id) {
+            const text = document.getElementById(id).innerText;
             try {
-                // Try modern Clipboard API
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                    await navigator.clipboard.writeText(val);
+                if (navigator.clipboard) {
+                    await navigator.clipboard.writeText(text);
                 } else {
-                    // Fallback to execCommand
                     const buf = document.getElementById('copyBuffer');
-                    buf.value = val;
-                    buf.select();
-                    document.execCommand('copy');
+                    buf.value = text; buf.select(); document.execCommand('copy');
                 }
-                showToast("Berhasil disalin!");
-            } catch (err) {
-                showToast("Gagal menyalin teks.");
-            }
+                showToast("Tersalin!");
+            } catch (e) { showToast("Gagal menyalin."); }
         }
 
-        function showToast(message) {
-            // Remove existing toasts to prevent stacking
-            const existing = document.querySelectorAll('.toast-msg');
-            existing.forEach(e => e.remove());
-
+        function showToast(msg) {
             const t = document.createElement('div');
-            t.className = 'toast-msg';
-            t.textContent = message;
-            t.style.cssText = `
-                position: fixed; 
-                bottom: 30px; 
-                right: 30px; 
-                background: #0f172a; 
-                color: #fff; 
-                padding: 12px 20px; 
-                border-radius: 8px; 
-                font-size: 13px; 
-                font-weight: 500;
-                z-index: 9999; 
-                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); 
-                transition: transform 0.3s, opacity 0.3s;
-                transform: translateY(100px);
-                opacity: 0;
-            `;
+            t.textContent = msg;
+            t.style.cssText = "position:fixed; bottom:20px; right:20px; background:#1e293b; color:#fff; padding:10px 20px; border-radius:8px; font-size:12px; z-index:1000;";
             document.body.appendChild(t);
-            
-            // Animation In
-            requestAnimationFrame(() => {
-                t.style.transform = 'translateY(0)';
-                t.style.opacity = '1';
-            });
-
-            // Animation Out
-            setTimeout(() => {
-                t.style.transform = 'translateY(20px)';
-                t.style.opacity = '0';
-                setTimeout(() => t.remove(), 300);
-            }, 3000);
+            setTimeout(() => t.remove(), 2500);
         }
-
-        // Handle enter key on inputs
-        document.querySelectorAll('input').forEach(input => {
-            input.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    const sectionId = input.closest('section').id;
-                    if (sectionId === 'feature1') generateWatermark();
-                }
-            });
-        });
     </script>
 </body>
 </html>
