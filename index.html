@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Career Tool Suite - Professional Edition</title>
+    <title>Career Tool Suite - Private Edition</title>
     <!-- Library PDF.js untuk rendering dokumen multi-halaman -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <style>
@@ -33,7 +33,7 @@
             min-height: 100vh;
         }
 
-        /* Sidebar - Optimasi Responsive */
+        /* Sidebar */
         .sidebar {
             width: 280px;
             background-color: var(--sidebar-bg);
@@ -204,11 +204,16 @@
             <button class="nav-btn" id="btn-tab-feature2" onclick="switchTab('feature2')">Contact Extractor</button>
             <button class="nav-btn" id="btn-tab-feature3" onclick="switchTab('feature3')">Job Image-to-Text</button>
         </div>
+        <div style="margin-top: auto; padding: 20px 12px;">
+            <p style="font-size: 11px; color: var(--text-muted); line-height: 1.4;">
+                Mode Privat: API Key dikonfigurasi secara internal.
+            </p>
+        </div>
     </nav>
 
     <main class="main-content">
         <div class="container">
-            
+
             <!-- FEATURE 1: WATERMARK -->
             <section id="feature1" class="feature-section active">
                 <div class="header-title">
@@ -298,7 +303,7 @@
                 </div>
 
                 <div id="ocrResult" class="output-container hidden">
-                    <span class="output-label">Hasil Scan Seluruh Halaman (Case Sensitive)</span>
+                    <span class="output-label">Hasil Scan Seluruh Halaman</span>
                     <div class="output-box" id="ocrOutput" style="max-height: 500px; overflow-y: auto;"></div>
                     <div class="action-bar">
                         <button class="btn-secondary" onclick="copyText('ocrOutput')">Salin Hasil Scan</button>
@@ -312,8 +317,12 @@
 
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-        const apiKey = ""; 
-        let currentPages = []; // Menyimpan base64 dari tiap halaman
+        
+        // --- API KEY KONFIGURASI INTERNAL ---
+        const INTERNAL_KEY = ""; 
+        // ------------------------------------
+
+        let currentPages = [];
 
         function switchTab(id) {
             document.querySelectorAll('.feature-section').forEach(s => s.classList.remove('active'));
@@ -335,8 +344,6 @@
                     try {
                         const typedarray = new Uint8Array(this.result);
                         const pdf = await pdfjsLib.getDocument(typedarray).promise;
-                        
-                        // Loop untuk memproses SETIAP halaman
                         for (let i = 1; i <= pdf.numPages; i++) {
                             const page = await pdf.getPage(i);
                             const viewport = page.getViewport({ scale: 2.0 });
@@ -345,59 +352,48 @@
                             canvas.height = viewport.height;
                             canvas.width = viewport.width;
                             await page.render({ canvasContext: ctx, viewport: viewport }).promise;
-                            
-                            currentPages.push({
-                                base64: canvas.toDataURL('image/png').split(',')[1],
-                                type: "image/png"
-                            });
+                            currentPages.push({ base64: canvas.toDataURL('image/png').split(',')[1], type: "image/png" });
                         }
                         document.getElementById(displayId).innerText = `File siap: ${file.name} (${pdf.numPages} hal)`;
                     } catch (e) {
-                        showToast("Gagal memproses seluruh halaman PDF.");
+                        showToast("Gagal memproses PDF.");
                     }
                 };
                 reader.readAsArrayBuffer(file);
             } else {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    currentPages.push({
-                        base64: e.target.result.split(',')[1],
-                        type: file.type
-                    });
+                    currentPages.push({ base64: e.target.result.split(',')[1], type: file.type });
                     document.getElementById(displayId).innerText = `Gambar siap: ${file.name}`;
                 };
                 reader.readAsDataURL(file);
             }
         }
 
-        // --- FEATURE 1: WATERMARK ---
         function generateWatermark() {
             const rawCompany = document.getElementById('companyName').value.trim();
             if (!rawCompany) return showToast("Mohon isi nama perusahaan");
-
             const company = rawCompany.toUpperCase();
             const offset = parseInt(document.getElementById('daysOffset').value) || 0;
             const count = parseInt(document.getElementById('duplicateCount').value) || 1;
-
-            const d = new Date();
-            d.setDate(d.getDate() + offset);
+            const d = new Date(); d.setDate(d.getDate() + offset);
             const dateStr = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
             const text = `DIUNGGAH UNTUK SELEKSI KERJA ${company} ${dateStr}`;
-
             document.getElementById('singleOutput').innerText = text;
             const listOutput = document.getElementById('arrayOutput');
             listOutput.innerHTML = '';
             for(let i=0; i<count; i++) {
                 const item = document.createElement('div');
-                item.style.marginBottom = "4px";
-                item.innerText = text;
+                item.style.marginBottom = "4px"; item.innerText = text;
                 listOutput.appendChild(item);
             }
             document.getElementById('watermarkResult').classList.remove('hidden');
         }
 
-        // --- FEATURE 2: EXTRACTOR ---
         async function runExtraction() {
+            const apiKey = typeof __apiKey !== 'undefined' ? __apiKey : INTERNAL_KEY;
+            if (!apiKey) return showToast("API Key tidak ditemukan dalam konfigurasi!");
+            
             const textInput = document.getElementById('jobDescription').value.trim();
             if (!textInput && currentPages.length === 0) return showToast("Input teks atau file tidak ditemukan");
 
@@ -405,9 +401,8 @@
             try {
                 let combinedText = textInput;
                 if (currentPages.length > 0) {
-                    // Memproses semua halaman melalui AI secara berurutan atau grup
                     const results = await Promise.all(currentPages.map(page => 
-                        geminiCall("OCR TASK: Read and list all text accurately. Focus on finding contact info.", page)
+                        geminiCall("OCR: Bacakan seluruh teks. Identifikasi email kontak, link pendaftaran, dan nomor WA.", page)
                     ));
                     combinedText += " " + results.join(" ");
                 }
@@ -417,59 +412,48 @@
                 const waRegex = /(\+?62[\s-]?\d{8,15}|08\d{8,13}|wa\.me\/\d+)/g;
 
                 const emails = [...new Set(combinedText.match(emailRegex) || [])];
-                const links = [...new Set((combinedText.match(linkRegex) || []).map(l => l.replace(/[.,]$/, "")))];
+                const links = [...new Set((combinedText.match(linkRegex) || []).map(l => l.replace(/[.,]$/,"")))].filter(l => !l.includes("googlevideo") && l.length > 5);
                 const was = [...new Set(combinedText.match(waRegex) || [])];
 
                 const container = document.getElementById('extractorContent');
                 container.innerHTML = '';
-                
-                if (emails.length) renderRes(container, "📧 Email Terdeteksi (Seluruh Halaman)", emails);
-                if (links.length) renderRes(container, "🔗 Link Terdeteksi (Seluruh Halaman)", links, true);
-                if (was.length) renderRes(container, "💬 Kontak WhatsApp (Seluruh Halaman)", was);
-                
-                if (!emails.length && !links.length && !was.length) {
-                    container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted)">Data tidak ditemukan di halaman manapun.</div>';
-                }
+                if (emails.length) renderRes(container, "📧 Email Terdeteksi", emails);
+                if (links.length) renderRes(container, "🔗 Link Terdeteksi", links, true);
+                if (was.length) renderRes(container, "💬 Kontak WhatsApp", was);
+                if (!emails.length && !links.length && !was.length) container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted)">Data kontak tidak ditemukan.</div>';
                 document.getElementById('jobResult').classList.remove('hidden');
             } catch (e) {
-                showToast("Gagal melakukan ekstraksi kontak.");
+                showToast("Terjadi kesalahan pada layanan AI.");
             } finally {
                 setLoading('btnExtract', false);
             }
         }
 
-        // --- FEATURE 3: OCR ---
         async function runOCR() {
+            const apiKey = typeof __apiKey !== 'undefined' ? __apiKey : INTERNAL_KEY;
+            if (!apiKey) return showToast("API Key tidak ditemukan dalam konfigurasi!");
             if (currentPages.length === 0) return showToast("Unggah file terlebih dahulu");
 
             setLoading('btnOCR', true);
             try {
                 const results = await Promise.all(currentPages.map((page, index) => 
-                    geminiCall(`TRANSCRIPTION TASK: Read all text from Page ${index+1}. Output exactly as written.`, page)
+                    geminiCall(`TRANSCRIBE: Halaman ${index+1}. Output hanya teks yang ada di gambar tanpa tambahan komentar.`, page)
                 ));
-                
                 const finalContent = results.map((text, i) => `--- HALAMAN ${i+1} ---\n${text}`).join("\n\n");
                 document.getElementById('ocrOutput').innerText = finalContent;
                 document.getElementById('ocrResult').classList.remove('hidden');
             } catch (e) {
-                showToast("Gagal memproses seluruh halaman.");
+                showToast("Gagal memproses data melalui AI.");
             } finally {
                 setLoading('btnOCR', false);
             }
         }
 
-        function resetOCR() {
-            document.getElementById('ocrOutput').innerText = '';
-            document.getElementById('ocrResult').classList.add('hidden');
-        }
-
-        // --- API CORE ---
         async function geminiCall(prompt, fileData) {
+            const apiKey = typeof __apiKey !== 'undefined' ? __apiKey : INTERNAL_KEY;
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
             const parts = [{ text: prompt }];
-            if (fileData?.base64) {
-                parts.push({ inlineData: { mimeType: fileData.type, data: fileData.base64 } });
-            }
+            if (fileData?.base64) parts.push({ inlineData: { mimeType: fileData.type, data: fileData.base64 } });
 
             for (let i = 0; i < 5; i++) {
                 try {
@@ -478,13 +462,14 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ contents: [{ parts }] })
                     });
+                    if (!res.ok) throw new Error();
                     const data = await res.json();
-                    return data.candidates[0].content.parts[0].text;
+                    return data.candidates?.[0]?.content?.parts?.[0]?.text || "";
                 } catch (e) {
                     await new Promise(r => setTimeout(r, Math.pow(2, i) * 1000));
                 }
             }
-            throw new Error("Gagal menghubungi AI");
+            throw new Error();
         }
 
         function renderRes(parent, title, items, isLink = false) {
@@ -493,15 +478,8 @@
             div.innerHTML = `<div style="font-weight:700; font-size:12px; color:var(--primary); margin-bottom:12px; text-transform:uppercase;">${title}</div>`;
             items.forEach(item => {
                 const el = document.createElement(isLink ? 'a' : 'div');
-                if(isLink) {
-                    el.href = item.startsWith('http') ? item : 'https://' + item;
-                    el.target = "_blank";
-                    el.style.color = "var(--primary)";
-                }
-                el.innerText = item;
-                el.style.display = "block";
-                el.style.marginBottom = "6px";
-                el.style.wordBreak = "break-all";
+                if(isLink) { el.href = item.startsWith('http') ? item : 'https://' + item; el.target = "_blank"; el.style.color = "var(--primary)"; }
+                el.innerText = item; el.style.display = "block"; el.style.marginBottom = "6px"; el.style.wordBreak = "break-all";
                 div.appendChild(el);
             });
             parent.appendChild(div);
@@ -511,33 +489,26 @@
             const btn = document.getElementById(btnId);
             const span = btn.querySelector('.btn-text');
             btn.disabled = isLoading;
-            if (isLoading) {
-                span.innerHTML = '<span class="loader"></span> Memproses Seluruh Halaman...';
-            } else {
-                span.innerText = btnId === 'btnOCR' ? 'Proses Scan Teks' : 'Mulai Ekstraksi Kontak';
-            }
+            if (isLoading) span.innerHTML = '<span class="loader"></span> Memproses...';
+            else span.innerText = btnId === 'btnOCR' ? 'Proses Scan Teks' : 'Mulai Ekstraksi Kontak';
         }
 
         function copyText(id) { executeCopy(document.getElementById(id).innerText); }
-        function copyList(id) {
-            const lines = Array.from(document.querySelectorAll(`#${id} div`)).map(d => d.innerText);
-            executeCopy(lines.join('\n'));
-        }
-
+        function copyList(id) { executeCopy(Array.from(document.querySelectorAll(`#${id} div`)).map(d => d.innerText).join('\n')); }
         function executeCopy(val) {
             const buf = document.getElementById('copyBuffer');
-            buf.value = val;
-            buf.select();
-            document.execCommand('copy');
+            buf.value = val; buf.select(); document.execCommand('copy');
             showToast("Berhasil disalin!");
         }
+
+        function resetOCR() { document.getElementById('ocrOutput').innerText = ''; document.getElementById('ocrResult').classList.add('hidden'); }
 
         function showToast(m) {
             const t = document.createElement('div');
             t.innerText = m;
-            t.style.cssText = `position:fixed; bottom:30px; right:30px; background:#1e293b; color:#fff; padding:12px 24px; border-radius:8px; font-size:13px; z-index:9999;`;
+            t.style.cssText = `position:fixed; bottom:30px; right:30px; background:#1e293b; color:#fff; padding:12px 24px; border-radius:8px; font-size:13px; z-index:9999; transition: opacity 0.3s;`;
             document.body.appendChild(t);
-            setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 500); }, 2000);
+            setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 500); }, 3000);
         }
     </script>
 </body>
