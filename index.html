@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Career Tool Suite - Private Edition</title>
-    <!-- Library PDF.js untuk rendering dokumen multi-halaman -->
+    <title>Career Tool Suite - Final Fix</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <style>
         :root {
@@ -19,167 +18,79 @@
             --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+        body { display: flex; background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; }
 
-        body {
-            display: flex;
-            background-color: var(--bg-main);
-            color: var(--text-main);
-            min-height: 100vh;
-        }
-
-        /* Sidebar */
         .sidebar {
-            width: 280px;
-            background-color: var(--sidebar-bg);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            position: fixed;
-            height: 100vh;
-            padding: 32px 16px;
-            z-index: 100;
+            width: 280px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; position: fixed; height: 100vh; padding: 32px 16px; z-index: 100;
         }
 
-        .brand {
-            padding: 0 12px 32px;
-            font-size: 1.25rem;
-            font-weight: 800;
-            color: var(--primary);
-            letter-spacing: -0.025em;
-            text-transform: uppercase;
-        }
+        .brand { padding: 0 12px 32px; font-size: 1.25rem; font-weight: 800; color: var(--primary); letter-spacing: -0.025em; text-transform: uppercase; }
 
-        .nav-menu {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
+        .nav-menu { display: flex; flex-direction: column; gap: 8px; }
         .nav-btn {
-            width: 100%;
-            padding: 12px 16px;
-            border: none;
-            background: transparent;
-            text-align: left;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--text-muted);
-            border-radius: var(--radius);
-            transition: all 0.2s ease;
+            width: 100%; padding: 12px 16px; border: none; background: transparent;
+            text-align: left; cursor: pointer; font-size: 14px; font-weight: 500;
+            color: var(--text-muted); border-radius: var(--radius); transition: all 0.2s ease;
         }
 
-        .nav-btn.active {
-            background-color: #eff6ff;
-            color: var(--primary);
-            font-weight: 600;
-        }
+        .nav-btn.active { background-color: #eff6ff; color: var(--primary); font-weight: 600; }
 
-        /* Layout Area */
-        .main-content {
-            margin-left: 280px;
-            flex: 1;
-            padding: 60px 40px;
-            display: flex;
-            justify-content: center;
-            min-width: 0;
-        }
+        .main-content { margin-left: 280px; flex: 1; padding: 60px 40px; display: flex; justify-content: center; min-width: 0; }
+        .container { width: 100%; max-width: 800px; }
 
-        .container {
-            width: 100%;
-            max-width: 800px;
-        }
+        .feature-section { display: none; }
+        .feature-section.active { display: block; animation: fadeIn 0.3s ease-in-out; }
 
-        .feature-section {
-            display: none;
-        }
-
-        .feature-section.active {
-            display: block;
-            animation: fadeIn 0.3s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         .header-title { margin-bottom: 32px; }
         .header-title h1 { font-size: 1.875rem; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
         .header-title p { color: var(--text-muted); font-size: 0.95rem; }
 
-        .card {
-            background: #ffffff;
-            border-radius: var(--radius);
-            padding: 32px;
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-            margin-bottom: 24px;
-        }
-
+        .card { background: #ffffff; border-radius: var(--radius); padding: 32px; border: 1px solid var(--border); box-shadow: var(--shadow); margin-bottom: 24px; }
         .form-group { margin-bottom: 24px; }
-        label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 13px; color: var(--text-main); text-transform: capitalize; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 13px; color: var(--text-main); text-transform: uppercase; }
 
-        input[type="text"], input[type="number"], textarea {
-            width: 100%;
-            padding: 14px 16px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            font-size: 15px;
-            outline: none;
-            background-color: #fff;
-            color: var(--text-main);
+        input, textarea {
+            width: 100%; padding: 14px 16px; border: 1px solid var(--border); border-radius: 8px;
+            font-size: 15px; outline: none; background-color: #fff; color: var(--text-main);
         }
-
-        textarea { min-height: 150px; }
+        textarea { min-height: 120px; resize: vertical; }
 
         .file-upload-wrapper {
-            position: relative;
-            border: 2px dashed var(--border);
-            border-radius: 8px;
-            padding: 30px;
-            text-align: center;
-            background: #f8fafc;
-            cursor: pointer;
+            position: relative; border: 2px dashed var(--border); border-radius: 8px;
+            padding: 30px; text-align: center; background: #f8fafc; cursor: pointer; transition: background 0.2s;
         }
-
-        .file-upload-wrapper input[type="file"] {
-            position: absolute; width: 100%; height: 100%; top: 0; left: 0; opacity: 0; cursor: pointer;
-        }
+        .file-upload-wrapper:hover { background: #f1f5f9; }
+        .file-upload-wrapper input[type="file"] { position: absolute; width: 100%; height: 100%; top: 0; left: 0; opacity: 0; cursor: pointer; }
 
         .btn-primary {
-            background-color: var(--primary);
-            color: #fff; border: none; padding: 14px 32px; border-radius: 8px;
-            cursor: pointer; font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 8px;
+            background-color: var(--primary); color: #fff; border: none; padding: 14px 32px; border-radius: 8px;
+            cursor: pointer; font-weight: 600; font-size: 14px; transition: background 0.2s;
         }
-
+        .btn-primary:hover { background-color: var(--primary-hover); }
         .btn-primary:disabled { background-color: #94a3b8; cursor: not-allowed; }
 
-        .output-container { margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--border); }
+        .output-container { margin-top: 40px; padding-top: 32px; border-top: 2px solid var(--border); }
         .output-container.hidden { display: none; }
         
-        .output-label { font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 12px; display: block; text-transform: uppercase; }
+        .output-label { font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 12px; display: block; text-transform: uppercase; letter-spacing: 0.05em; }
         .output-box {
-            background-color: #ffffff; border: 1px solid var(--border); border-radius: 8px;
+            background-color: #f8fafc; border: 1px solid var(--border); border-radius: 8px;
             padding: 24px; font-family: 'SFMono-Regular', Consolas, monospace;
-            font-size: 14px; line-height: 1.7; color: #334155; white-space: pre-wrap;
+            font-size: 14px; line-height: 1.7; color: #1e293b; white-space: pre-wrap; word-break: break-all;
         }
 
         .action-bar { margin-top: 16px; display: flex; gap: 12px; }
-        .btn-secondary { background-color: #f1f5f9; color: #475569; border: 1px solid var(--border); padding: 10px 20px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+        .btn-secondary { background-color: #fff; color: #475569; border: 1px solid var(--border); padding: 10px 20px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
 
         .loader {
-            display: inline-block; width: 18px; height: 18px;
+            display: inline-block; width: 16px; height: 16px; vertical-align: middle;
             border: 2px solid rgba(255,255,255,0.3); border-radius: 50%;
-            border-top-color: #fff; animation: spin 1s linear infinite;
+            border-top-color: #fff; animation: spin 0.8s linear infinite; margin-right: 8px;
         }
-
         @keyframes spin { to { transform: rotate(360deg); } }
 
         #copyBuffer { position: absolute; left: -9999px; }
@@ -187,129 +98,108 @@
         @media (max-width: 900px) {
             .sidebar { width: 100%; height: auto; position: relative; border-right: none; padding: 16px; }
             .main-content { margin-left: 0; padding: 24px; }
-            .nav-menu { flex-direction: row; overflow-x: auto; white-space: nowrap; }
+            .nav-menu { flex-direction: row; overflow-x: auto; }
         }
     </style>
 </head>
 <body>
 
-    <textarea id="copyBuffer" aria-hidden="true"></textarea>
+    <textarea id="copyBuffer"></textarea>
 
     <nav class="sidebar">
         <div class="brand">Career Tools</div>
         <div class="nav-menu">
-            <button class="nav-btn active" id="btn-tab-feature1" onclick="switchTab('feature1')">Verification Watermark</button>
-            <button class="nav-btn" id="btn-tab-feature2" onclick="switchTab('feature2')">Contact Extractor</button>
-            <button class="nav-btn" id="btn-tab-feature3" onclick="switchTab('feature3')">Job Image-to-Text</button>
-        </div>
-        <div style="margin-top: auto; padding: 20px 12px;">
-            <p style="font-size: 11px; color: var(--text-muted); line-height: 1.4;">
-                Aplikasi siap digunakan. Akses AI telah dikonfigurasi secara otomatis.
-            </p>
+            <button class="nav-btn active" id="tab-f1" onclick="switchTab('f1')">Verification Watermark</button>
+            <button class="nav-btn" id="tab-f2" onclick="switchTab('f2')">Contact Extractor</button>
+            <button class="nav-btn" id="tab-f3" onclick="switchTab('f3')">Job Image-to-Text</button>
         </div>
     </nav>
 
     <main class="main-content">
         <div class="container">
 
-            <!-- FEATURE 1: WATERMARK -->
-            <section id="feature1" class="feature-section active">
+            <!-- F1: WATERMARK -->
+            <section id="f1" class="feature-section active">
                 <div class="header-title">
                     <h1>Verification Watermark</h1>
-                    <p>Hasilkan teks verifikasi khusus untuk diletakkan pada dokumen lamaran kerja Anda.</p>
+                    <p>Hasilkan teks verifikasi untuk dokumen lamaran Anda agar aman dari penyalahgunaan.</p>
                 </div>
                 <div class="card">
                     <div class="form-group">
-                        <label>Nama Perusahaan</label>
-                        <input type="text" id="companyName" placeholder="Contoh: PT UNILEVER OLEOCHEMICAL INDONESIA" autocomplete="off">
+                        <label>Target Nama Perusahaan</label>
+                        <input type="text" id="companyName" placeholder="Contoh: PT MAJU MUNDUR" autocomplete="off">
                     </div>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                         <div class="form-group">
-                            <label>Maju/Mundur Hari</label>
-                            <input type="number" id="daysOffset" placeholder="0 (Hari Ini)" value="0" autocomplete="off">
+                            <label>Penyesuaian Tanggal (H+)</label>
+                            <input type="number" id="daysOffset" value="0">
                         </div>
                         <div class="form-group">
-                            <label>Jumlah Duplikasi</label>
-                            <input type="number" id="duplicateCount" placeholder="Contoh: 25" value="1" autocomplete="off">
+                            <label>Jumlah Baris Duplikasi</label>
+                            <input type="number" id="duplicateCount" value="1">
                         </div>
                     </div>
                     <button class="btn-primary" onclick="generateWatermark()">Generate Watermark</button>
                 </div>
 
-                <div id="watermarkResult" class="output-container hidden">
-                    <span class="output-label">Teks Tunggal (Kapital Otomatis)</span>
-                    <div class="output-box" id="singleOutput"></div>
-                    <div class="action-bar">
-                        <button class="btn-secondary" onclick="copyText('singleOutput')">Salin Teks</button>
-                    </div>
+                <div id="res-f1" class="output-container hidden">
+                    <span class="output-label">Hasil Teks Tunggal</span>
+                    <div class="output-box" id="out-f1-single"></div>
+                    <div class="action-bar"><button class="btn-secondary" onclick="copy('out-f1-single')">Salin Teks</button></div>
 
-                    <div style="margin-top: 40px;">
-                        <span class="output-label">List Duplikasi</span>
-                        <div class="output-box" id="arrayOutput" style="max-height: 400px; overflow-y: auto;"></div>
-                        <div class="action-bar">
-                            <button class="btn-secondary" onclick="copyList('arrayOutput')">Salin Semua List</button>
-                        </div>
+                    <div style="margin-top: 32px;">
+                        <span class="output-label">Hasil List Duplikasi</span>
+                        <div class="output-box" id="out-f1-list" style="max-height: 300px; overflow-y: auto;"></div>
+                        <div class="action-bar"><button class="btn-secondary" onclick="copyList('out-f1-list')">Salin Semua</button></div>
                     </div>
                 </div>
             </section>
 
-            <!-- FEATURE 2: CONTACT EXTRACTOR -->
-            <section id="feature2" class="feature-section">
+            <!-- F2: EXTRACTOR -->
+            <section id="f2" class="feature-section">
                 <div class="header-title">
                     <h1>Contact Extractor</h1>
-                    <p>Ekstrak alamat email, link, dan nomor kontak dari deskripsi atau dokumen lowongan.</p>
+                    <p>Ambil email, link pendaftaran, dan nomor WhatsApp dari deskripsi lowongan secara otomatis.</p>
                 </div>
                 <div class="card">
                     <div class="form-group">
-                        <label>Input Teks Deskripsi</label>
-                        <textarea id="jobDescription" placeholder="Tempel teks lowongan di sini..." autocomplete="off"></textarea>
+                        <label>Tempel Deskripsi Lowongan</label>
+                        <textarea id="descInput" placeholder="Copy-paste info lowongan di sini..."></textarea>
                     </div>
                     <div class="form-group">
-                        <label>Atau Unggah Gambar/PDF</label>
+                        <label>Atau Unggah File Gambar/PDF</label>
                         <div class="file-upload-wrapper">
-                            <div class="file-info" id="fileNameExtractor">Pilih atau Seret file ke sini</div>
-                            <input type="file" id="fileExtractor" accept="image/*,application/pdf" onchange="handleFile(this, 'fileNameExtractor')">
+                            <div id="fileInfo-f2">Klik untuk pilih file (Gambar/PDF)</div>
+                            <input type="file" accept="image/*,application/pdf" onchange="processFile(this, 'fileInfo-f2')">
                         </div>
                     </div>
-                    <button class="btn-primary" id="btnExtract" onclick="runExtraction()">
-                        <span class="btn-text">Mulai Ekstraksi Kontak</span>
-                    </button>
+                    <button class="btn-primary" id="btn-f2" onclick="runExtraction()">Mulai Ekstraksi Kontak</button>
                 </div>
-
-                <div id="jobResult" class="output-container hidden">
-                    <div id="extractorContent"></div>
-                    <div class="action-bar">
-                        <button class="btn-secondary" onclick="resetResult('jobResult')">Bersihkan</button>
-                    </div>
+                <div id="res-f2" class="output-container hidden">
+                    <div id="out-f2"></div>
                 </div>
             </section>
 
-            <!-- FEATURE 3: IMAGE TO TEXT -->
-            <section id="feature3" class="feature-section">
+            <!-- F3: OCR -->
+            <section id="f3" class="feature-section">
                 <div class="header-title">
                     <h1>Job Image-to-Text</h1>
-                    <p>Konversi foto/PDF menjadi teks detail dari seluruh halaman dokumen.</p>
+                    <p>Ubah gambar atau PDF lowongan menjadi teks yang bisa disalin sepenuhnya.</p>
                 </div>
                 <div class="card">
                     <div class="form-group">
-                        <label>Unggah Gambar/PDF Dokumen</label>
+                        <label>Unggah Dokumen (Gambar/PDF)</label>
                         <div class="file-upload-wrapper">
-                            <div class="file-info" id="fileNameOCR">Pilih atau Seret file ke sini</div>
-                            <input type="file" id="fileOCR" accept="image/*,application/pdf" onchange="handleFile(this, 'fileNameOCR')">
+                            <div id="fileInfo-f3">Pilih file untuk di-scan</div>
+                            <input type="file" accept="image/*,application/pdf" onchange="processFile(this, 'fileInfo-f3')">
                         </div>
                     </div>
-                    <button class="btn-primary" id="btnOCR" onclick="runOCR()">
-                        <span class="btn-text">Proses Scan Teks</span>
-                    </button>
+                    <button class="btn-primary" id="btn-f3" onclick="runOCR()">Proses Scan Teks</button>
                 </div>
-
-                <div id="ocrResult" class="output-container hidden">
-                    <span class="output-label">Hasil Scan Seluruh Halaman</span>
-                    <div class="output-box" id="ocrOutput" style="max-height: 500px; overflow-y: auto;"></div>
-                    <div class="action-bar">
-                        <button class="btn-secondary" onclick="copyText('ocrOutput')">Salin Hasil Scan</button>
-                        <button class="btn-secondary" onclick="resetResult('ocrResult')">Bersihkan</button>
-                    </div>
+                <div id="res-f3" class="output-container hidden">
+                    <span class="output-label">Teks Hasil Scan</span>
+                    <div class="output-box" id="out-f3" style="max-height: 500px; overflow-y: auto;"></div>
+                    <div class="action-bar"><button class="btn-secondary" onclick="copy('out-f3')">Salin Hasil</button></div>
                 </div>
             </section>
 
@@ -317,146 +207,117 @@
     </main>
 
     <script>
-        // Menggunakan API Key dari environment jika tersedia, jika tidak tetap aman
+        // API Key ditangani secara internal oleh sistem
         const apiKey = ""; 
 
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
         
-        let currentPages = [];
+        let loadedPages = [];
 
         function switchTab(id) {
             document.querySelectorAll('.feature-section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            document.getElementById('btn-tab-' + id).classList.add('active');
-            currentPages = [];
+            document.getElementById('tab-' + id).classList.add('active');
+            loadedPages = [];
         }
 
-        async function handleFile(input, displayId) {
+        async function processFile(input, infoId) {
             const file = input.files[0];
             if (!file) return;
-            document.getElementById(displayId).innerText = `Memproses file: ${file.name}...`;
-            currentPages = [];
+            const info = document.getElementById(infoId);
+            info.innerText = "Memuat file...";
+            loadedPages = [];
 
             if (file.type === "application/pdf") {
                 const reader = new FileReader();
                 reader.onload = async function() {
-                    try {
-                        const typedarray = new Uint8Array(this.result);
-                        const pdf = await pdfjsLib.getDocument(typedarray).promise;
-                        for (let i = 1; i <= pdf.numPages; i++) {
-                            const page = await pdf.getPage(i);
-                            const viewport = page.getViewport({ scale: 2.0 });
-                            const canvas = document.createElement('canvas');
-                            const ctx = canvas.getContext('2d');
-                            canvas.height = viewport.height;
-                            canvas.width = viewport.width;
-                            await page.render({ canvasContext: ctx, viewport: viewport }).promise;
-                            currentPages.push({ base64: canvas.toDataURL('image/png').split(',')[1], type: "image/png" });
-                        }
-                        document.getElementById(displayId).innerText = `File siap: ${file.name} (${pdf.numPages} hal)`;
-                    } catch (e) {
-                        showToast("Gagal memproses PDF.");
+                    const pdf = await pdfjsLib.getDocument(new Uint8Array(this.result)).promise;
+                    for (let i = 1; i <= pdf.numPages; i++) {
+                        const page = await pdf.getPage(i);
+                        const vp = page.getViewport({ scale: 2 });
+                        const canvas = document.createElement('canvas');
+                        canvas.height = vp.height; canvas.width = vp.width;
+                        await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+                        loadedPages.push({ base64: canvas.toDataURL('image/png').split(',')[1], type: 'image/png' });
                     }
+                    info.innerText = `File siap: ${file.name} (${pdf.numPages} hal)`;
                 };
                 reader.readAsArrayBuffer(file);
             } else {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    currentPages.push({ base64: e.target.result.split(',')[1], type: file.type });
-                    document.getElementById(displayId).innerText = `Gambar siap: ${file.name}`;
+                    loadedPages.push({ base64: e.target.result.split(',')[1], type: file.type });
+                    info.innerText = `Gambar siap: ${file.name}`;
                 };
                 reader.readAsDataURL(file);
             }
         }
 
         function generateWatermark() {
-            const rawCompany = document.getElementById('companyName').value.trim();
-            if (!rawCompany) return showToast("Mohon isi nama perusahaan");
-            const company = rawCompany.toUpperCase();
+            const name = document.getElementById('companyName').value.trim();
+            if (!name) return toast("Isi nama perusahaan!");
             const offset = parseInt(document.getElementById('daysOffset').value) || 0;
             const count = parseInt(document.getElementById('duplicateCount').value) || 1;
-            const d = new Date(); d.setDate(d.getDate() + offset);
-            const dateStr = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
-            const text = `DIUNGGAH UNTUK SELEKSI KERJA ${company} ${dateStr}`;
             
-            document.getElementById('singleOutput').innerText = text;
-            const listOutput = document.getElementById('arrayOutput');
-            listOutput.innerHTML = '';
+            const date = new Date(); date.setDate(date.getDate() + offset);
+            const dateStr = date.toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'}).toUpperCase();
+            const result = `DIUNGGAH UNTUK SELEKSI KERJA ${name.toUpperCase()} ${dateStr}`;
+
+            document.getElementById('out-f1-single').innerText = result;
+            const list = document.getElementById('out-f1-list');
+            list.innerHTML = '';
             for(let i=0; i<count; i++) {
-                const item = document.createElement('div');
-                item.style.marginBottom = "4px"; item.innerText = text;
-                listOutput.appendChild(item);
+                const d = document.createElement('div'); d.innerText = result; d.style.marginBottom = "5px";
+                list.appendChild(d);
             }
-            document.getElementById('watermarkResult').classList.remove('hidden');
-            window.scrollTo({ top: document.getElementById('watermarkResult').offsetTop - 100, behavior: 'smooth' });
+            document.getElementById('res-f1').classList.remove('hidden');
         }
 
         async function runExtraction() {
-            const textInput = document.getElementById('jobDescription').value.trim();
-            if (!textInput && currentPages.length === 0) return showToast("Input teks atau file tidak ditemukan");
-
-            setLoading('btnExtract', true);
+            const txt = document.getElementById('descInput').value.trim();
+            if (!txt && !loadedPages.length) return toast("Input teks atau file kosong!");
+            
+            setLoading('btn-f2', true);
             try {
-                let combinedText = textInput;
-                if (currentPages.length > 0) {
-                    const results = await Promise.all(currentPages.map(page => 
-                        geminiCall("OCR: Bacakan seluruh teks secara akurat. Fokus pada email, link, dan nomor kontak.", page)
-                    ));
-                    combinedText += " " + results.join(" ");
+                let fullTxt = txt;
+                if (loadedPages.length) {
+                    const ocrArr = await Promise.all(loadedPages.map(p => geminiCall("Ekstrak teks kontak dari gambar ini (email, link, wa).", p)));
+                    fullTxt += " " + ocrArr.join(" ");
                 }
-                
-                // Ekstraksi Regex
-                const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]{2,})/g;
-                const linkRegex = /((?:https?:\/\/|www\.)[^\s<>"',()]+|(?:\b[a-zA-Z0-9-]+\.(?:ly|ee|com|net|id|me|link|info|be|gl|co|site|online)\/[^\s<>"',()]+))/gi;
-                const waRegex = /(\+?62[\s-]?\d{8,15}|08\d{8,13}|wa\.me\/\d+)/g;
 
-                const emails = [...new Set(combinedText.match(emailRegex) || [])];
-                const links = [...new Set((combinedText.match(linkRegex) || []).map(l => l.replace(/[.,]$/,"")))].filter(l => !l.includes("googlevideo") && l.length > 5);
-                const was = [...new Set(combinedText.match(waRegex) || [])];
+                const emails = [...new Set(fullTxt.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]{2,})/g) || [])];
+                const links = [...new Set(fullTxt.match(/((?:https?:\/\/|www\.)[^\s<>"',()]+)/gi) || [])];
+                const was = [...new Set(fullTxt.match(/(\+?62[\s-]?\d{8,15}|08\d{8,13}|wa\.me\/\d+)/g) || [])];
 
-                const container = document.getElementById('extractorContent');
-                container.innerHTML = '';
-                if (emails.length) renderRes(container, "📧 Email Terdeteksi", emails);
-                if (links.length) renderRes(container, "🔗 Link Terdeteksi", links, true);
-                if (was.length) renderRes(container, "💬 Kontak WhatsApp", was);
-                
-                if (!emails.length && !links.length && !was.length) {
-                    container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted)">Data kontak tidak ditemukan. Silakan periksa kembali input Anda.</div>';
+                const out = document.getElementById('out-f2');
+                out.innerHTML = '';
+                if (!emails.length && !links.length && !was.length) out.innerHTML = '<p style="text-align:center; padding:20px;">Kontak tidak ditemukan.</p>';
+                else {
+                    if (emails.length) buildGroup(out, "📧 Email", emails);
+                    if (links.length) buildGroup(out, "🔗 Link / URL", links, true);
+                    if (was.length) buildGroup(out, "💬 WhatsApp", was);
                 }
-                document.getElementById('jobResult').classList.remove('hidden');
-                window.scrollTo({ top: document.getElementById('jobResult').offsetTop - 100, behavior: 'smooth' });
-            } catch (e) {
-                showToast("Terjadi kesalahan pada layanan AI.");
-            } finally {
-                setLoading('btnExtract', false);
-            }
+                document.getElementById('res-f2').classList.remove('hidden');
+            } catch (e) { toast("Error: " + e.message); }
+            finally { setLoading('btn-f2', false); }
         }
 
         async function runOCR() {
-            if (currentPages.length === 0) return showToast("Unggah file terlebih dahulu");
-
-            setLoading('btnOCR', true);
+            if (!loadedPages.length) return toast("Unggah file dulu!");
+            setLoading('btn-f3', true);
             try {
-                const results = await Promise.all(currentPages.map((page, index) => 
-                    geminiCall(`TRANSCRIBE: Halaman ${index+1}. Bacakan seluruh teks yang terlihat secara akurat.`, page)
-                ));
-                const finalContent = results.map((text, i) => `--- HALAMAN ${i+1} ---\n${text}`).join("\n\n");
-                document.getElementById('ocrOutput').innerText = finalContent;
-                document.getElementById('ocrResult').classList.remove('hidden');
-                window.scrollTo({ top: document.getElementById('ocrResult').offsetTop - 100, behavior: 'smooth' });
-            } catch (e) {
-                showToast("Gagal memproses data melalui AI.");
-            } finally {
-                setLoading('btnOCR', false);
-            }
+                const results = await Promise.all(loadedPages.map((p, i) => geminiCall(`Halaman ${i+1}: Salin semua teks dalam dokumen ini secara lengkap dan rapi.`, p)));
+                document.getElementById('out-f3').innerText = results.join("\n\n--- HALAMAN BARU ---\n\n");
+                document.getElementById('res-f3').classList.remove('hidden');
+            } catch (e) { toast("Error: " + e.message); }
+            finally { setLoading('btn-f3', false); }
         }
 
-        // Fungsi pemanggilan API Gemini dengan Exponential Backoff
-        async function geminiCall(prompt, fileData) {
+        async function geminiCall(prompt, file) {
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
             const parts = [{ text: prompt }];
-            if (fileData?.base64) parts.push({ inlineData: { mimeType: fileData.type, data: fileData.base64 } });
+            if (file) parts.push({ inlineData: { mimeType: file.type, data: file.base64 } });
 
             for (let i = 0; i < 5; i++) {
                 try {
@@ -465,62 +326,54 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ contents: [{ parts }] })
                     });
-                    if (!res.ok) throw new Error();
+                    if (!res.ok) throw new Error("Gagal mengambil data AI");
                     const data = await res.json();
                     return data.candidates?.[0]?.content?.parts?.[0]?.text || "";
                 } catch (e) {
-                    // Backoff: 1s, 2s, 4s, 8s, 16s
                     await new Promise(r => setTimeout(r, Math.pow(2, i) * 1000));
                 }
             }
-            throw new Error("Gagal terhubung ke AI setelah beberapa percobaan.");
+            throw new Error("Layanan AI sedang sibuk. Coba lagi nanti.");
         }
 
-        function renderRes(parent, title, items, isLink = false) {
-            const div = document.createElement('div');
-            div.style.cssText = "background:#fff; border:1px solid var(--border); border-radius:8px; padding:20px; margin-bottom:16px;";
-            div.innerHTML = `<div style="font-weight:700; font-size:12px; color:var(--primary); margin-bottom:12px; text-transform:uppercase;">${title}</div>`;
-            items.forEach(item => {
+        function buildGroup(parent, title, items, isLink = false) {
+            const box = document.createElement('div');
+            box.style.cssText = "background:#fff; border:1px solid var(--border); padding:20px; border-radius:8px; margin-bottom:16px;";
+            box.innerHTML = `<label style="color:var(--primary); font-size:11px;">${title}</label>`;
+            items.forEach(it => {
                 const el = document.createElement(isLink ? 'a' : 'div');
-                if(isLink) { el.href = item.startsWith('http') ? item : 'https://' + item; el.target = "_blank"; el.style.color = "var(--primary)"; }
-                el.innerText = item; el.style.display = "block"; el.style.marginBottom = "6px"; el.style.wordBreak = "break-all"; el.style.fontSize = "14px";
-                div.appendChild(el);
+                if(isLink) { el.href = it.startsWith('http') ? it : 'https://' + it; el.target = "_blank"; el.style.color = "var(--primary)"; }
+                el.innerText = it; el.style.display = "block"; el.style.marginStr = "8px 0"; el.style.fontSize = "14px";
+                box.appendChild(el);
             });
-            parent.appendChild(div);
+            parent.appendChild(box);
         }
 
-        function setLoading(btnId, isLoading) {
-            const btn = document.getElementById(btnId);
-            const span = btn.querySelector('.btn-text');
-            btn.disabled = isLoading;
-            if (isLoading) span.innerHTML = '<span class="loader"></span> Memproses...';
-            else span.innerText = btnId === 'btnOCR' ? 'Proses Scan Teks' : 'Mulai Ekstraksi Kontak';
+        function setLoading(id, show) {
+            const b = document.getElementById(id);
+            b.disabled = show;
+            b.innerHTML = show ? '<span class="loader"></span> Memproses...' : (id==='btn-f3' ? 'Proses Scan Teks' : 'Mulai Ekstraksi Kontak');
         }
 
-        function copyText(id) { executeCopy(document.getElementById(id).innerText); }
-        function copyList(id) { executeCopy(Array.from(document.querySelectorAll(`#${id} div`)).map(d => d.innerText).join('\n')); }
-        function executeCopy(val) {
-            const buf = document.getElementById('copyBuffer');
-            buf.value = val; buf.select(); document.execCommand('copy');
-            showToast("Berhasil disalin!");
+        function copy(id) { 
+            const b = document.getElementById('copyBuffer');
+            b.value = document.getElementById(id).innerText; b.select(); document.execCommand('copy');
+            toast("Berhasil disalin!");
         }
 
-        function resetResult(id) { 
-            const el = document.getElementById(id);
-            if (id === 'ocrResult') document.getElementById('ocrOutput').innerText = '';
-            if (id === 'jobResult') document.getElementById('extractorContent').innerHTML = '';
-            el.classList.add('hidden'); 
+        function copyList(id) {
+            const b = document.getElementById('copyBuffer');
+            b.value = Array.from(document.querySelectorAll(`#${id} div`)).map(d => d.innerText).join('\n');
+            b.select(); document.execCommand('copy');
+            toast("Semua baris disalin!");
         }
 
-        function showToast(m) {
-            const existing = document.querySelector('.toast-notif');
-            if (existing) existing.remove();
+        function toast(m) {
             const t = document.createElement('div');
-            t.className = 'toast-notif';
             t.innerText = m;
-            t.style.cssText = `position:fixed; bottom:30px; right:30px; background:#1e293b; color:#fff; padding:12px 24px; border-radius:8px; font-size:13px; z-index:9999; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); transition: opacity 0.5s;`;
+            t.style.cssText = "position:fixed; bottom:20px; right:20px; background:#1e293b; color:#fff; padding:12px 24px; border-radius:8px; z-index:999; font-size:13px; box-shadow:0 4px 12px rgba(0,0,0,0.1);";
             document.body.appendChild(t);
-            setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 500); }, 3000);
+            setTimeout(() => t.remove(), 3000);
         }
     </script>
 </body>
