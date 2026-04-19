@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Career Tool Suite - Professional Edition</title>
+    <!-- Library PDF.js untuk rendering dokumen multi-halaman -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <style>
         :root {
             --primary: #2563eb;
@@ -31,7 +33,7 @@
             min-height: 100vh;
         }
 
-        /* Sidebar */
+        /* Sidebar - Optimasi Responsive */
         .sidebar {
             width: 280px;
             background-color: var(--sidebar-bg);
@@ -88,6 +90,7 @@
             padding: 60px 40px;
             display: flex;
             justify-content: center;
+            min-width: 0;
         }
 
         .container {
@@ -186,7 +189,7 @@
         @media (max-width: 900px) {
             .sidebar { width: 100%; height: auto; position: relative; border-right: none; padding: 16px; }
             .main-content { margin-left: 0; padding: 24px; }
-            .nav-menu { flex-direction: row; overflow-x: auto; }
+            .nav-menu { flex-direction: row; overflow-x: auto; white-space: nowrap; }
         }
     </style>
 </head>
@@ -220,11 +223,11 @@
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                         <div class="form-group">
                             <label>Hari dari Sekarang (0 = Hari ini)</label>
-                            <input type="number" id="daysOffset" placeholder="0" autocomplete="off">
+                            <input type="number" id="daysOffset" placeholder="0" value="0" autocomplete="off">
                         </div>
                         <div class="form-group">
                             <label>Jumlah Baris Duplikasi</label>
-                            <input type="number" id="duplicateCount" placeholder="1" autocomplete="off">
+                            <input type="number" id="duplicateCount" placeholder="1" value="1" autocomplete="off">
                         </div>
                     </div>
                     <button class="btn-primary" onclick="generateWatermark()">Generate Watermark</button>
@@ -251,7 +254,7 @@
             <section id="feature2" class="feature-section">
                 <div class="header-title">
                     <h1>Contact & Link Extractor</h1>
-                    <p>Ekstrak kontak (Email & Link) secara akurat dari teks atau dokumen.</p>
+                    <p>Ekstrak kontak (Email & Link) dari seluruh halaman dokumen atau gambar.</p>
                 </div>
                 <div class="card">
                     <div class="form-group">
@@ -259,7 +262,7 @@
                         <textarea id="jobDescription" placeholder="Tempel detail lowongan di sini..." autocomplete="off"></textarea>
                     </div>
                     <div class="form-group">
-                        <label>Atau Unggah Gambar/PDF Iklan</label>
+                        <label>Atau Unggah Gambar/PDF (Bisa banyak halaman)</label>
                         <div class="file-upload-wrapper">
                             <div class="file-info" id="fileNameExtractor">Pilih atau Seret file ke sini</div>
                             <input type="file" id="fileExtractor" accept="image/*,application/pdf" onchange="handleFile(this, 'fileNameExtractor')">
@@ -279,7 +282,7 @@
             <section id="feature3" class="feature-section">
                 <div class="header-title">
                     <h1>Job Image-to-Text</h1>
-                    <p>Konversi foto lowongan kerja menjadi teks detail tanpa mengubah karakter asli.</p>
+                    <p>Konversi foto/PDF menjadi teks detail dari seluruh halaman dokumen.</p>
                 </div>
                 <div class="card">
                     <div class="form-group">
@@ -295,7 +298,7 @@
                 </div>
 
                 <div id="ocrResult" class="output-container hidden">
-                    <span class="output-label">Hasil Scan (Case Sensitive)</span>
+                    <span class="output-label">Hasil Scan Seluruh Halaman (Case Sensitive)</span>
                     <div class="output-box" id="ocrOutput" style="max-height: 500px; overflow-y: auto;"></div>
                     <div class="action-bar">
                         <button class="btn-secondary" onclick="copyText('ocrOutput')">Salin Hasil Scan</button>
@@ -308,27 +311,63 @@
     </main>
 
     <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
         const apiKey = ""; 
-        let currentFileData = { base64: null, type: null };
+        let currentPages = []; // Menyimpan base64 dari tiap halaman
 
-        // Tab Management - In-memory state (Data tidak hilang saat pindah menu)
         function switchTab(id) {
             document.querySelectorAll('.feature-section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             document.getElementById('btn-tab-' + id).classList.add('active');
+            currentPages = [];
         }
 
-        function handleFile(input, displayId) {
+        async function handleFile(input, displayId) {
             const file = input.files[0];
             if (!file) return;
-            document.getElementById(displayId).innerText = `File terpilih: ${file.name}`;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                currentFileData.base64 = e.target.result.split(',')[1];
-                currentFileData.type = file.type;
-            };
-            reader.readAsDataURL(file);
+            document.getElementById(displayId).innerText = `Memproses file: ${file.name}...`;
+            currentPages = [];
+
+            if (file.type === "application/pdf") {
+                const reader = new FileReader();
+                reader.onload = async function() {
+                    try {
+                        const typedarray = new Uint8Array(this.result);
+                        const pdf = await pdfjsLib.getDocument(typedarray).promise;
+                        
+                        // Loop untuk memproses SETIAP halaman
+                        for (let i = 1; i <= pdf.numPages; i++) {
+                            const page = await pdf.getPage(i);
+                            const viewport = page.getViewport({ scale: 2.0 });
+                            const canvas = document.createElement('canvas');
+                            const ctx = canvas.getContext('2d');
+                            canvas.height = viewport.height;
+                            canvas.width = viewport.width;
+                            await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+                            
+                            currentPages.push({
+                                base64: canvas.toDataURL('image/png').split(',')[1],
+                                type: "image/png"
+                            });
+                        }
+                        document.getElementById(displayId).innerText = `File siap: ${file.name} (${pdf.numPages} hal)`;
+                    } catch (e) {
+                        showToast("Gagal memproses seluruh halaman PDF.");
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            } else {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    currentPages.push({
+                        base64: e.target.result.split(',')[1],
+                        type: file.type
+                    });
+                    document.getElementById(displayId).innerText = `Gambar siap: ${file.name}`;
+                };
+                reader.readAsDataURL(file);
+            }
         }
 
         // --- FEATURE 1: WATERMARK ---
@@ -354,81 +393,66 @@
                 item.innerText = text;
                 listOutput.appendChild(item);
             }
-            
             document.getElementById('watermarkResult').classList.remove('hidden');
         }
 
         // --- FEATURE 2: EXTRACTOR ---
         async function runExtraction() {
             const textInput = document.getElementById('jobDescription').value.trim();
-            if (!textInput && !currentFileData.base64) return showToast("Input teks atau file tidak ditemukan");
+            if (!textInput && currentPages.length === 0) return showToast("Input teks atau file tidak ditemukan");
 
             setLoading('btnExtract', true);
             try {
-                let finalTeks = textInput;
-                if (currentFileData.base64) {
-                    finalTeks = await geminiCall("OCR TASK: Transcribe all text from the image/pdf. Keep the original case sensitivity strictly. Do not modify or correct any character case.", currentFileData);
+                let combinedText = textInput;
+                if (currentPages.length > 0) {
+                    // Memproses semua halaman melalui AI secara berurutan atau grup
+                    const results = await Promise.all(currentPages.map(page => 
+                        geminiCall("OCR TASK: Read and list all text accurately. Focus on finding contact info.", page)
+                    ));
+                    combinedText += " " + results.join(" ");
                 }
                 
-                // Case sensitive extraction
-                const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/g;
+                const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]{2,})/g;
                 const linkRegex = /((?:https?:\/\/|www\.)[^\s<>"',()]+|(?:\b[a-zA-Z0-9-]+\.(?:ly|ee|com|net|id|me|link|info|be|gl|co|site|online)\/[^\s<>"',()]+))/gi;
-                const waRegex = /(\+?62[\s-]?\d{8,15}|08\d{8,13}|wa\.me\/\d+|whatsapp\.com\/\d+)/g;
+                const waRegex = /(\+?62[\s-]?\d{8,15}|08\d{8,13}|wa\.me\/\d+)/g;
 
-                const emails = [...new Set(finalTeks.match(emailRegex) || [])];
-                const links = [...new Set((finalTeks.match(linkRegex) || []).map(l => l.replace(/[.,]$/, "")))];
-                const was = [...new Set(finalTeks.match(waRegex) || [])];
+                const emails = [...new Set(combinedText.match(emailRegex) || [])];
+                const links = [...new Set((combinedText.match(linkRegex) || []).map(l => l.replace(/[.,]$/, "")))];
+                const was = [...new Set(combinedText.match(waRegex) || [])];
 
                 const container = document.getElementById('extractorContent');
                 container.innerHTML = '';
                 
-                if (emails.length) renderRes(container, "📧 Email Terdeteksi (Case Sensitive)", emails);
-                if (links.length) renderRes(container, "🔗 Link Terdeteksi", links, true);
-                if (was.length) renderRes(container, "💬 Kontak WhatsApp", was);
+                if (emails.length) renderRes(container, "📧 Email Terdeteksi (Seluruh Halaman)", emails);
+                if (links.length) renderRes(container, "🔗 Link Terdeteksi (Seluruh Halaman)", links, true);
+                if (was.length) renderRes(container, "💬 Kontak WhatsApp (Seluruh Halaman)", was);
                 
                 if (!emails.length && !links.length && !was.length) {
-                    container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted)">Data tidak ditemukan.</div>';
+                    container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted)">Data tidak ditemukan di halaman manapun.</div>';
                 }
                 document.getElementById('jobResult').classList.remove('hidden');
             } catch (e) {
-                showToast("Gagal melakukan ekstraksi.");
+                showToast("Gagal melakukan ekstraksi kontak.");
             } finally {
                 setLoading('btnExtract', false);
             }
         }
 
-        function renderRes(parent, title, items, isLink = false) {
-            const div = document.createElement('div');
-            div.style.cssText = "background:#fff; border:1px solid var(--border); border-radius:8px; padding:20px; margin-bottom:16px;";
-            div.innerHTML = `<div style="font-weight:700; font-size:12px; color:var(--primary); margin-bottom:12px; text-transform:uppercase;">${title}</div>`;
-            items.forEach(item => {
-                const el = document.createElement(isLink ? 'a' : 'div');
-                if(isLink) {
-                    el.href = item.startsWith('http') ? item : 'https://' + item;
-                    el.target = "_blank";
-                    el.style.color = "var(--primary)";
-                }
-                el.innerText = item;
-                el.style.display = "block";
-                el.style.marginBottom = "6px";
-                el.style.wordBreak = "break-all";
-                div.appendChild(el);
-            });
-            parent.appendChild(div);
-        }
-
         // --- FEATURE 3: OCR ---
         async function runOCR() {
-            if (!currentFileData.base64) return showToast("Unggah file terlebih dahulu");
+            if (currentPages.length === 0) return showToast("Unggah file terlebih dahulu");
 
             setLoading('btnOCR', true);
             try {
-                const prompt = "TRANSCRIPTION TASK: Read and output all text exactly as written. DO NOT change character casing. Maintain full case sensitivity as seen in the source document. Raw text only.";
-                const result = await geminiCall(prompt, currentFileData);
-                document.getElementById('ocrOutput').innerText = result;
+                const results = await Promise.all(currentPages.map((page, index) => 
+                    geminiCall(`TRANSCRIPTION TASK: Read all text from Page ${index+1}. Output exactly as written.`, page)
+                ));
+                
+                const finalContent = results.map((text, i) => `--- HALAMAN ${i+1} ---\n${text}`).join("\n\n");
+                document.getElementById('ocrOutput').innerText = finalContent;
                 document.getElementById('ocrResult').classList.remove('hidden');
             } catch (e) {
-                showToast("Gagal memproses gambar.");
+                showToast("Gagal memproses seluruh halaman.");
             } finally {
                 setLoading('btnOCR', false);
             }
@@ -463,13 +487,32 @@
             throw new Error("Gagal menghubungi AI");
         }
 
-        // --- UTILITIES ---
+        function renderRes(parent, title, items, isLink = false) {
+            const div = document.createElement('div');
+            div.style.cssText = "background:#fff; border:1px solid var(--border); border-radius:8px; padding:20px; margin-bottom:16px;";
+            div.innerHTML = `<div style="font-weight:700; font-size:12px; color:var(--primary); margin-bottom:12px; text-transform:uppercase;">${title}</div>`;
+            items.forEach(item => {
+                const el = document.createElement(isLink ? 'a' : 'div');
+                if(isLink) {
+                    el.href = item.startsWith('http') ? item : 'https://' + item;
+                    el.target = "_blank";
+                    el.style.color = "var(--primary)";
+                }
+                el.innerText = item;
+                el.style.display = "block";
+                el.style.marginBottom = "6px";
+                el.style.wordBreak = "break-all";
+                div.appendChild(el);
+            });
+            parent.appendChild(div);
+        }
+
         function setLoading(btnId, isLoading) {
             const btn = document.getElementById(btnId);
             const span = btn.querySelector('.btn-text');
             btn.disabled = isLoading;
             if (isLoading) {
-                span.innerHTML = '<span class="loader"></span> Memproses...';
+                span.innerHTML = '<span class="loader"></span> Memproses Seluruh Halaman...';
             } else {
                 span.innerText = btnId === 'btnOCR' ? 'Proses Scan Teks' : 'Mulai Ekstraksi Kontak';
             }
