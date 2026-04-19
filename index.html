@@ -52,6 +52,7 @@
             font-weight: 800;
             color: var(--primary);
             letter-spacing: -0.025em;
+            text-transform: uppercase;
         }
 
         .nav-menu {
@@ -72,9 +73,6 @@
             color: var(--text-muted);
             border-radius: var(--radius);
             transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 12px;
         }
 
         .nav-btn.active {
@@ -126,7 +124,7 @@
         }
 
         .form-group { margin-bottom: 24px; }
-        label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: var(--text-main); }
+        label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 13px; color: var(--text-main); text-transform: none; }
 
         input[type="text"], input[type="number"], textarea {
             width: 100%;
@@ -198,7 +196,7 @@
     <textarea id="copyBuffer" aria-hidden="true"></textarea>
 
     <nav class="sidebar">
-        <div class="brand">CAREER TOOLS</div>
+        <div class="brand">Career Tools</div>
         <div class="nav-menu">
             <button class="nav-btn active" id="btn-tab-feature1" onclick="switchTab('feature1')">Verification Watermark</button>
             <button class="nav-btn" id="btn-tab-feature2" onclick="switchTab('feature2')">Contact Extractor</button>
@@ -218,28 +216,28 @@
             <section id="feature1" class="feature-section active">
                 <div class="header-title">
                     <h1>Verification Watermark</h1>
-                    <p>Hasilkan teks verifikasi khusus untuk diletakkan pada dokumen lamaran.</p>
+                    <p>Hasilkan teks verifikasi khusus untuk diletakkan pada dokumen lamaran kerja Anda.</p>
                 </div>
                 <div class="card">
                     <div class="form-group">
                         <label>Nama Perusahaan</label>
-                        <input type="text" id="companyName" placeholder="Masukkan Nama Perusahaan Tujuan" autocomplete="off">
+                        <input type="text" id="companyName" placeholder="Contoh: PT UNILEVER OLEOCHEMICAL INDONESIA" autocomplete="off">
                     </div>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                         <div class="form-group">
-                            <label>Hari dari Sekarang (0 = Hari ini)</label>
-                            <input type="number" id="daysOffset" placeholder="0" value="0" autocomplete="off">
+                            <label>Maju/Mundur Hari</label>
+                            <input type="number" id="daysOffset" placeholder="0 (Hari Ini)" value="0" autocomplete="off">
                         </div>
                         <div class="form-group">
-                            <label>Jumlah Baris Duplikasi</label>
-                            <input type="number" id="duplicateCount" placeholder="1" value="1" autocomplete="off">
+                            <label>Jumlah Duplikasi</label>
+                            <input type="number" id="duplicateCount" placeholder="Contoh: 25" value="1" autocomplete="off">
                         </div>
                     </div>
                     <button class="btn-primary" onclick="generateWatermark()">Generate Watermark</button>
                 </div>
 
                 <div id="watermarkResult" class="output-container hidden">
-                    <span class="output-label">Teks Tunggal</span>
+                    <span class="output-label">Teks Tunggal (Kapital Otomatis)</span>
                     <div class="output-box" id="singleOutput"></div>
                     <div class="action-bar">
                         <button class="btn-secondary" onclick="copyText('singleOutput')">Salin Teks</button>
@@ -247,7 +245,7 @@
 
                     <div style="margin-top: 40px;">
                         <span class="output-label">List Duplikasi</span>
-                        <div class="output-box" id="arrayOutput" style="max-height: 300px; overflow-y: auto;"></div>
+                        <div class="output-box" id="arrayOutput" style="max-height: 400px; overflow-y: auto;"></div>
                         <div class="action-bar">
                             <button class="btn-secondary" onclick="copyList('arrayOutput')">Salin Semua List</button>
                         </div>
@@ -258,16 +256,16 @@
             <!-- FEATURE 2: CONTACT EXTRACTOR -->
             <section id="feature2" class="feature-section">
                 <div class="header-title">
-                    <h1>Contact & Link Extractor</h1>
-                    <p>Ekstrak kontak (Email & Link) dari seluruh halaman dokumen atau gambar.</p>
+                    <h1>Contact Extractor</h1>
+                    <p>Ekstrak alamat email, link, dan nomor kontak dari deskripsi atau dokumen lowongan.</p>
                 </div>
                 <div class="card">
                     <div class="form-group">
                         <label>Input Teks Deskripsi</label>
-                        <textarea id="jobDescription" placeholder="Tempel detail lowongan di sini..." autocomplete="off"></textarea>
+                        <textarea id="jobDescription" placeholder="Tempel teks lowongan di sini..." autocomplete="off"></textarea>
                     </div>
                     <div class="form-group">
-                        <label>Atau Unggah Gambar/PDF (Bisa banyak halaman)</label>
+                        <label>Atau Unggah Gambar/PDF</label>
                         <div class="file-upload-wrapper">
                             <div class="file-info" id="fileNameExtractor">Pilih atau Seret file ke sini</div>
                             <input type="file" id="fileExtractor" accept="image/*,application/pdf" onchange="handleFile(this, 'fileNameExtractor')">
@@ -318,11 +316,20 @@
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
         
-        // --- API KEY KONFIGURASI INTERNAL ---
+        // --- API KEY KONFIGURASI INTERNAL (PASTIKAN TERISI) ---
         const INTERNAL_KEY = ""; 
-        // ------------------------------------
+        // ----------------------------------------------------
 
         let currentPages = [];
+
+        // Fungsi pembantu untuk mendapatkan API Key yang valid
+        function getActiveApiKey() {
+            // Cek variabel global __apiKey dari environment, jika tidak ada/kosong, gunakan INTERNAL_KEY
+            if (typeof __apiKey !== 'undefined' && __apiKey && __apiKey.trim() !== "") {
+                return __apiKey;
+            }
+            return INTERNAL_KEY;
+        }
 
         function switchTab(id) {
             document.querySelectorAll('.feature-section').forEach(s => s.classList.remove('active'));
@@ -379,6 +386,7 @@
             const d = new Date(); d.setDate(d.getDate() + offset);
             const dateStr = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
             const text = `DIUNGGAH UNTUK SELEKSI KERJA ${company} ${dateStr}`;
+            
             document.getElementById('singleOutput').innerText = text;
             const listOutput = document.getElementById('arrayOutput');
             listOutput.innerHTML = '';
@@ -388,10 +396,11 @@
                 listOutput.appendChild(item);
             }
             document.getElementById('watermarkResult').classList.remove('hidden');
+            window.scrollTo({ top: document.getElementById('watermarkResult').offsetTop, behavior: 'smooth' });
         }
 
         async function runExtraction() {
-            const apiKey = typeof __apiKey !== 'undefined' ? __apiKey : INTERNAL_KEY;
+            const apiKey = getActiveApiKey();
             if (!apiKey) return showToast("API Key tidak ditemukan dalam konfigurasi!");
             
             const textInput = document.getElementById('jobDescription').value.trim();
@@ -402,7 +411,7 @@
                 let combinedText = textInput;
                 if (currentPages.length > 0) {
                     const results = await Promise.all(currentPages.map(page => 
-                        geminiCall("OCR: Bacakan seluruh teks. Identifikasi email kontak, link pendaftaran, dan nomor WA.", page)
+                        geminiCall("OCR: Bacakan seluruh teks. Identifikasi email kontak, link pendaftaran, dan nomor WA/Telepon.", page)
                     ));
                     combinedText += " " + results.join(" ");
                 }
@@ -420,8 +429,12 @@
                 if (emails.length) renderRes(container, "📧 Email Terdeteksi", emails);
                 if (links.length) renderRes(container, "🔗 Link Terdeteksi", links, true);
                 if (was.length) renderRes(container, "💬 Kontak WhatsApp", was);
-                if (!emails.length && !links.length && !was.length) container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted)">Data kontak tidak ditemukan.</div>';
+                
+                if (!emails.length && !links.length && !was.length) {
+                    container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted)">Data kontak tidak ditemukan.</div>';
+                }
                 document.getElementById('jobResult').classList.remove('hidden');
+                window.scrollTo({ top: document.getElementById('jobResult').offsetTop, behavior: 'smooth' });
             } catch (e) {
                 showToast("Terjadi kesalahan pada layanan AI.");
             } finally {
@@ -430,18 +443,19 @@
         }
 
         async function runOCR() {
-            const apiKey = typeof __apiKey !== 'undefined' ? __apiKey : INTERNAL_KEY;
+            const apiKey = getActiveApiKey();
             if (!apiKey) return showToast("API Key tidak ditemukan dalam konfigurasi!");
             if (currentPages.length === 0) return showToast("Unggah file terlebih dahulu");
 
             setLoading('btnOCR', true);
             try {
                 const results = await Promise.all(currentPages.map((page, index) => 
-                    geminiCall(`TRANSCRIBE: Halaman ${index+1}. Output hanya teks yang ada di gambar tanpa tambahan komentar.`, page)
+                    geminiCall(`TRANSCRIBE: Halaman ${index+1}. Bacakan seluruh teks yang terlihat secara akurat. Jangan tambahkan komentar apapun di luar teks asli dokumen.`, page)
                 ));
                 const finalContent = results.map((text, i) => `--- HALAMAN ${i+1} ---\n${text}`).join("\n\n");
                 document.getElementById('ocrOutput').innerText = finalContent;
                 document.getElementById('ocrResult').classList.remove('hidden');
+                window.scrollTo({ top: document.getElementById('ocrResult').offsetTop, behavior: 'smooth' });
             } catch (e) {
                 showToast("Gagal memproses data melalui AI.");
             } finally {
@@ -450,7 +464,7 @@
         }
 
         async function geminiCall(prompt, fileData) {
-            const apiKey = typeof __apiKey !== 'undefined' ? __apiKey : INTERNAL_KEY;
+            const apiKey = getActiveApiKey();
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
             const parts = [{ text: prompt }];
             if (fileData?.base64) parts.push({ inlineData: { mimeType: fileData.type, data: fileData.base64 } });
@@ -469,7 +483,7 @@
                     await new Promise(r => setTimeout(r, Math.pow(2, i) * 1000));
                 }
             }
-            throw new Error();
+            throw new Error("Layanan AI sedang sibuk.");
         }
 
         function renderRes(parent, title, items, isLink = false) {
@@ -479,7 +493,7 @@
             items.forEach(item => {
                 const el = document.createElement(isLink ? 'a' : 'div');
                 if(isLink) { el.href = item.startsWith('http') ? item : 'https://' + item; el.target = "_blank"; el.style.color = "var(--primary)"; }
-                el.innerText = item; el.style.display = "block"; el.style.marginBottom = "6px"; el.style.wordBreak = "break-all";
+                el.innerText = item; el.style.display = "block"; el.style.marginBottom = "6px"; el.style.wordBreak = "break-all"; el.style.fontSize = "14px";
                 div.appendChild(el);
             });
             parent.appendChild(div);
@@ -504,11 +518,14 @@
         function resetOCR() { document.getElementById('ocrOutput').innerText = ''; document.getElementById('ocrResult').classList.add('hidden'); }
 
         function showToast(m) {
+            const existing = document.querySelector('.toast-notif');
+            if (existing) existing.remove();
             const t = document.createElement('div');
+            t.className = 'toast-notif';
             t.innerText = m;
-            t.style.cssText = `position:fixed; bottom:30px; right:30px; background:#1e293b; color:#fff; padding:12px 24px; border-radius:8px; font-size:13px; z-index:9999; transition: opacity 0.3s;`;
+            t.style.cssText = `position:fixed; bottom:30px; right:30px; background:#1e293b; color:#fff; padding:12px 24px; border-radius:8px; font-size:13px; z-index:9999; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);`;
             document.body.appendChild(t);
-            setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 500); }, 3000);
+            setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.5s'; setTimeout(() => t.remove(), 500); }, 3000);
         }
     </script>
 </body>
