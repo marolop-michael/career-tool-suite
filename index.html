@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Career Tool Suite - Final Fix</title>
+    <title>Career Tool Suite - Professional Edition</title>
+    <!-- Library untuk handling PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <style>
         :root {
@@ -18,188 +19,331 @@
             --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
-        body { display: flex; background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
 
+        body {
+            display: flex;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar Responsive Fix */
         .sidebar {
-            width: 280px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border);
-            display: flex; flex-direction: column; position: fixed; height: 100vh; padding: 32px 16px; z-index: 100;
+            width: 280px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            padding: 32px 16px;
+            z-index: 1000;
+            transition: transform 0.3s ease;
         }
 
-        .brand { padding: 0 12px 32px; font-size: 1.25rem; font-weight: 800; color: var(--primary); letter-spacing: -0.025em; text-transform: uppercase; }
+        .brand {
+            padding: 0 12px 32px;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: -0.025em;
+            text-transform: uppercase;
+        }
 
-        .nav-menu { display: flex; flex-direction: column; gap: 8px; }
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
         .nav-btn {
-            width: 100%; padding: 12px 16px; border: none; background: transparent;
-            text-align: left; cursor: pointer; font-size: 14px; font-weight: 500;
-            color: var(--text-muted); border-radius: var(--radius); transition: all 0.2s ease;
+            width: 100%;
+            padding: 12px 16px;
+            border: none;
+            background: transparent;
+            text-align: left;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-muted);
+            border-radius: var(--radius);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
-        .nav-btn.active { background-color: #eff6ff; color: var(--primary); font-weight: 600; }
+        .nav-btn.active {
+            background-color: #eff6ff;
+            color: var(--primary);
+            font-weight: 600;
+        }
 
-        .main-content { margin-left: 280px; flex: 1; padding: 60px 40px; display: flex; justify-content: center; min-width: 0; }
-        .container { width: 100%; max-width: 800px; }
+        /* Content Area */
+        .main-content {
+            margin-left: 280px;
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+            min-width: 0; /* Prevent flex blowout */
+        }
 
-        .feature-section { display: none; }
-        .feature-section.active { display: block; animation: fadeIn 0.3s ease-in-out; }
+        .container {
+            width: 100%;
+            max-width: 800px;
+        }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .feature-section {
+            display: none;
+        }
+
+        .feature-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
         .header-title { margin-bottom: 32px; }
         .header-title h1 { font-size: 1.875rem; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
         .header-title p { color: var(--text-muted); font-size: 0.95rem; }
 
-        .card { background: #ffffff; border-radius: var(--radius); padding: 32px; border: 1px solid var(--border); box-shadow: var(--shadow); margin-bottom: 24px; }
-        .form-group { margin-bottom: 24px; }
-        label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 13px; color: var(--text-main); text-transform: uppercase; }
-
-        input, textarea {
-            width: 100%; padding: 14px 16px; border: 1px solid var(--border); border-radius: 8px;
-            font-size: 15px; outline: none; background-color: #fff; color: var(--text-main);
+        .card {
+            background: #ffffff;
+            border-radius: var(--radius);
+            padding: 32px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
         }
-        textarea { min-height: 120px; resize: vertical; }
+
+        .form-group { margin-bottom: 24px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: var(--text-main); }
+
+        input[type="text"], input[type="number"], textarea {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+            background-color: #fff;
+            color: var(--text-main);
+            transition: border-color 0.2s;
+        }
+        
+        input:focus, textarea:focus {
+            border-color: var(--primary);
+        }
+
+        textarea { min-height: 150px; resize: vertical; }
 
         .file-upload-wrapper {
-            position: relative; border: 2px dashed var(--border); border-radius: 8px;
-            padding: 30px; text-align: center; background: #f8fafc; cursor: pointer; transition: background 0.2s;
+            position: relative;
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            background: #f8fafc;
+            cursor: pointer;
+            transition: background 0.2s;
         }
-        .file-upload-wrapper:hover { background: #f1f5f9; }
-        .file-upload-wrapper input[type="file"] { position: absolute; width: 100%; height: 100%; top: 0; left: 0; opacity: 0; cursor: pointer; }
+        
+        .file-upload-wrapper:hover {
+            background: #f1f5f9;
+        }
+
+        .file-upload-wrapper input[type="file"] {
+            position: absolute; width: 100%; height: 100%; top: 0; left: 0; opacity: 0; cursor: pointer;
+        }
 
         .btn-primary {
-            background-color: var(--primary); color: #fff; border: none; padding: 14px 32px; border-radius: 8px;
-            cursor: pointer; font-weight: 600; font-size: 14px; transition: background 0.2s;
+            background-color: var(--primary);
+            color: #fff; border: none; padding: 14px 32px; border-radius: 8px;
+            cursor: pointer; font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            transition: background 0.2s;
+            width: 100%;
         }
+
         .btn-primary:hover { background-color: var(--primary-hover); }
         .btn-primary:disabled { background-color: #94a3b8; cursor: not-allowed; }
 
-        .output-container { margin-top: 40px; padding-top: 32px; border-top: 2px solid var(--border); }
+        .output-container { margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--border); }
         .output-container.hidden { display: none; }
         
-        .output-label { font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 12px; display: block; text-transform: uppercase; letter-spacing: 0.05em; }
+        .output-label { font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 12px; display: block; text-transform: uppercase; }
         .output-box {
-            background-color: #f8fafc; border: 1px solid var(--border); border-radius: 8px;
+            background-color: #ffffff; border: 1px solid var(--border); border-radius: 8px;
             padding: 24px; font-family: 'SFMono-Regular', Consolas, monospace;
-            font-size: 14px; line-height: 1.7; color: #1e293b; white-space: pre-wrap; word-break: break-all;
+            font-size: 14px; line-height: 1.7; color: #334155; white-space: pre-wrap;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
         }
 
-        .action-bar { margin-top: 16px; display: flex; gap: 12px; }
-        .btn-secondary { background-color: #fff; color: #475569; border: 1px solid var(--border); padding: 10px 20px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+        .action-bar { margin-top: 16px; display: flex; gap: 12px; flex-wrap: wrap; }
+        .btn-secondary { background-color: #f1f5f9; color: #475569; border: 1px solid var(--border); padding: 10px 20px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+        .btn-secondary:hover { background-color: #e2e8f0; }
 
         .loader {
-            display: inline-block; width: 16px; height: 16px; vertical-align: middle;
+            display: inline-block; width: 18px; height: 18px;
             border: 2px solid rgba(255,255,255,0.3); border-radius: 50%;
-            border-top-color: #fff; animation: spin 0.8s linear infinite; margin-right: 8px;
+            border-top-color: #fff; animation: spin 1s linear infinite;
         }
+
         @keyframes spin { to { transform: rotate(360deg); } }
 
         #copyBuffer { position: absolute; left: -9999px; }
 
+        /* Tablet & Mobile Responsive Optimization */
         @media (max-width: 900px) {
-            .sidebar { width: 100%; height: auto; position: relative; border-right: none; padding: 16px; }
-            .main-content { margin-left: 0; padding: 24px; }
-            .nav-menu { flex-direction: row; overflow-x: auto; }
+            body { flex-direction: column; }
+            .sidebar { 
+                width: 100%; 
+                height: auto; 
+                position: relative; 
+                border-right: none; 
+                border-bottom: 1px solid var(--border);
+                padding: 16px; 
+            }
+            .brand { padding: 0 0 16px; text-align: center; }
+            .nav-menu { 
+                flex-direction: row; 
+                overflow-x: auto; 
+                padding-bottom: 8px;
+                justify-content: center;
+            }
+            .nav-btn { width: auto; white-space: nowrap; padding: 10px 14px; }
+            .main-content { margin-left: 0; padding: 24px 16px; }
+            .header-title h1 { font-size: 1.5rem; }
+        }
+
+        @media (max-width: 600px) {
+            .nav-menu { justify-content: flex-start; }
+            .action-bar .btn-secondary { width: 100%; }
         }
     </style>
 </head>
 <body>
 
-    <textarea id="copyBuffer"></textarea>
+    <textarea id="copyBuffer" aria-hidden="true"></textarea>
 
     <nav class="sidebar">
-        <div class="brand">Career Tools</div>
+        <div class="brand">CAREER TOOLS</div>
         <div class="nav-menu">
-            <button class="nav-btn active" id="tab-f1" onclick="switchTab('f1')">Verification Watermark</button>
-            <button class="nav-btn" id="tab-f2" onclick="switchTab('f2')">Contact Extractor</button>
-            <button class="nav-btn" id="tab-f3" onclick="switchTab('f3')">Job Image-to-Text</button>
+            <button class="nav-btn active" id="btn-tab-feature1" onclick="switchTab('feature1')">Verification Watermark</button>
+            <button class="nav-btn" id="btn-tab-feature2" onclick="switchTab('feature2')">Contact Extractor</button>
+            <button class="nav-btn" id="btn-tab-feature3" onclick="switchTab('feature3')">Job Image-to-Text</button>
         </div>
     </nav>
 
     <main class="main-content">
         <div class="container">
-
-            <!-- F1: WATERMARK -->
-            <section id="f1" class="feature-section active">
+            
+            <!-- FEATURE 1: WATERMARK -->
+            <section id="feature1" class="feature-section active">
                 <div class="header-title">
                     <h1>Verification Watermark</h1>
-                    <p>Hasilkan teks verifikasi untuk dokumen lamaran Anda agar aman dari penyalahgunaan.</p>
+                    <p>Hasilkan teks verifikasi khusus untuk diletakkan pada dokumen lamaran.</p>
                 </div>
                 <div class="card">
                     <div class="form-group">
-                        <label>Target Nama Perusahaan</label>
-                        <input type="text" id="companyName" placeholder="Contoh: PT MAJU MUNDUR" autocomplete="off">
+                        <label>Nama Perusahaan</label>
+                        <input type="text" id="companyName" placeholder="Masukkan Nama Perusahaan Tujuan" autocomplete="off">
                     </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
                         <div class="form-group">
-                            <label>Penyesuaian Tanggal (H+)</label>
-                            <input type="number" id="daysOffset" value="0">
+                            <label>Hari dari Sekarang (0 = Hari ini)</label>
+                            <input type="number" id="daysOffset" value="0" autocomplete="off">
                         </div>
                         <div class="form-group">
                             <label>Jumlah Baris Duplikasi</label>
-                            <input type="number" id="duplicateCount" value="1">
+                            <input type="number" id="duplicateCount" value="1" autocomplete="off">
                         </div>
                     </div>
                     <button class="btn-primary" onclick="generateWatermark()">Generate Watermark</button>
                 </div>
 
-                <div id="res-f1" class="output-container hidden">
-                    <span class="output-label">Hasil Teks Tunggal</span>
-                    <div class="output-box" id="out-f1-single"></div>
-                    <div class="action-bar"><button class="btn-secondary" onclick="copy('out-f1-single')">Salin Teks</button></div>
+                <div id="watermarkResult" class="output-container hidden">
+                    <span class="output-label">Teks Tunggal</span>
+                    <div class="output-box" id="singleOutput"></div>
+                    <div class="action-bar">
+                        <button class="btn-secondary" onclick="copyText('singleOutput')">Salin Teks</button>
+                    </div>
 
-                    <div style="margin-top: 32px;">
-                        <span class="output-label">Hasil List Duplikasi</span>
-                        <div class="output-box" id="out-f1-list" style="max-height: 300px; overflow-y: auto;"></div>
-                        <div class="action-bar"><button class="btn-secondary" onclick="copyList('out-f1-list')">Salin Semua</button></div>
+                    <div style="margin-top: 40px;">
+                        <span class="output-label">List Duplikasi</span>
+                        <div class="output-box" id="arrayOutput" style="max-height: 300px; overflow-y: auto;"></div>
+                        <div class="action-bar">
+                            <button class="btn-secondary" onclick="copyList('arrayOutput')">Salin Semua List</button>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            <!-- F2: EXTRACTOR -->
-            <section id="f2" class="feature-section">
+            <!-- FEATURE 2: CONTACT EXTRACTOR -->
+            <section id="feature2" class="feature-section">
                 <div class="header-title">
-                    <h1>Contact Extractor</h1>
-                    <p>Ambil email, link pendaftaran, dan nomor WhatsApp dari deskripsi lowongan secara otomatis.</p>
+                    <h1>Contact & Link Extractor</h1>
+                    <p>Ekstrak kontak (Email & Link) secara akurat dari teks atau dokumen.</p>
                 </div>
                 <div class="card">
                     <div class="form-group">
-                        <label>Tempel Deskripsi Lowongan</label>
-                        <textarea id="descInput" placeholder="Copy-paste info lowongan di sini..."></textarea>
+                        <label>Input Teks Deskripsi</label>
+                        <textarea id="jobDescription" placeholder="Tempel detail lowongan di sini..." autocomplete="off"></textarea>
                     </div>
                     <div class="form-group">
-                        <label>Atau Unggah File Gambar/PDF</label>
+                        <label>Atau Unggah Gambar/PDF Iklan</label>
                         <div class="file-upload-wrapper">
-                            <div id="fileInfo-f2">Klik untuk pilih file (Gambar/PDF)</div>
-                            <input type="file" accept="image/*,application/pdf" onchange="processFile(this, 'fileInfo-f2')">
+                            <div class="file-info" id="fileNameExtractor">Pilih atau Seret file ke sini</div>
+                            <input type="file" id="fileExtractor" accept="image/*,application/pdf" onchange="handleFileInput(this, 'fileNameExtractor')">
                         </div>
                     </div>
-                    <button class="btn-primary" id="btn-f2" onclick="runExtraction()">Mulai Ekstraksi Kontak</button>
+                    <button class="btn-primary" id="btnExtract" onclick="runExtraction()">
+                        <span class="btn-text">Mulai Ekstraksi Kontak</span>
+                    </button>
                 </div>
-                <div id="res-f2" class="output-container hidden">
-                    <div id="out-f2"></div>
+
+                <div id="jobResult" class="output-container hidden">
+                    <div id="extractorContent"></div>
                 </div>
             </section>
 
-            <!-- F3: OCR -->
-            <section id="f3" class="feature-section">
+            <!-- FEATURE 3: IMAGE TO TEXT -->
+            <section id="feature3" class="feature-section">
                 <div class="header-title">
                     <h1>Job Image-to-Text</h1>
-                    <p>Ubah gambar atau PDF lowongan menjadi teks yang bisa disalin sepenuhnya.</p>
+                    <p>Konversi foto lowongan kerja menjadi teks detail tanpa mengubah karakter asli.</p>
                 </div>
                 <div class="card">
                     <div class="form-group">
-                        <label>Unggah Dokumen (Gambar/PDF)</label>
+                        <label>Unggah Gambar/PDF Dokumen</label>
                         <div class="file-upload-wrapper">
-                            <div id="fileInfo-f3">Pilih file untuk di-scan</div>
-                            <input type="file" accept="image/*,application/pdf" onchange="processFile(this, 'fileInfo-f3')">
+                            <div class="file-info" id="fileNameOCR">Pilih atau Seret file ke sini</div>
+                            <input type="file" id="fileOCR" accept="image/*,application/pdf" onchange="handleFileInput(this, 'fileNameOCR')">
                         </div>
                     </div>
-                    <button class="btn-primary" id="btn-f3" onclick="runOCR()">Proses Scan Teks</button>
+                    <button class="btn-primary" id="btnOCR" onclick="runOCR()">
+                        <span class="btn-text">Proses Scan Teks</span>
+                    </button>
                 </div>
-                <div id="res-f3" class="output-container hidden">
-                    <span class="output-label">Teks Hasil Scan</span>
-                    <div class="output-box" id="out-f3" style="max-height: 500px; overflow-y: auto;"></div>
-                    <div class="action-bar"><button class="btn-secondary" onclick="copy('out-f3')">Salin Hasil</button></div>
+
+                <div id="ocrResult" class="output-container hidden">
+                    <span class="output-label">Hasil Scan (Case Sensitive)</span>
+                    <div class="output-box" id="ocrOutput" style="max-height: 500px; overflow-y: auto;"></div>
+                    <div class="action-bar">
+                        <button class="btn-secondary" onclick="copyText('ocrOutput')">Salin Hasil Scan</button>
+                        <button class="btn-secondary" onclick="resetOCR()">Bersihkan</button>
+                    </div>
                 </div>
             </section>
 
@@ -207,117 +351,187 @@
     </main>
 
     <script>
-        // API Key ditangani secara internal oleh sistem
         const apiKey = ""; 
-
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
         
-        let loadedPages = [];
+        // Simpan data file per tab agar tidak bertabrakan
+        let currentFiles = []; 
 
         function switchTab(id) {
             document.querySelectorAll('.feature-section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            document.getElementById('tab-' + id).classList.add('active');
-            loadedPages = [];
+            document.getElementById('btn-tab-' + id).classList.add('active');
+            // Reset files saat pindah tab agar bersih
+            currentFiles = [];
         }
 
-        async function processFile(input, infoId) {
+        async function handleFileInput(input, displayId) {
             const file = input.files[0];
             if (!file) return;
-            const info = document.getElementById(infoId);
-            info.innerText = "Memuat file...";
-            loadedPages = [];
+            
+            const display = document.getElementById(displayId);
+            display.innerText = `Memproses: ${file.name}...`;
+            currentFiles = [];
 
-            if (file.type === "application/pdf") {
-                const reader = new FileReader();
-                reader.onload = async function() {
-                    const pdf = await pdfjsLib.getDocument(new Uint8Array(this.result)).promise;
+            try {
+                if (file.type === "application/pdf") {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                    
                     for (let i = 1; i <= pdf.numPages; i++) {
                         const page = await pdf.getPage(i);
-                        const vp = page.getViewport({ scale: 2 });
+                        const viewport = page.getViewport({ scale: 2.0 });
                         const canvas = document.createElement('canvas');
-                        canvas.height = vp.height; canvas.width = vp.width;
-                        await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
-                        loadedPages.push({ base64: canvas.toDataURL('image/png').split(',')[1], type: 'image/png' });
+                        const context = canvas.getContext('2d');
+                        canvas.height = viewport.height;
+                        canvas.width = viewport.width;
+                        
+                        await page.render({ canvasContext: context, viewport: viewport }).promise;
+                        currentFiles.push({
+                            base64: canvas.toDataURL('image/png').split(',')[1],
+                            type: 'image/png'
+                        });
                     }
-                    info.innerText = `File siap: ${file.name} (${pdf.numPages} hal)`;
-                };
-                reader.readAsArrayBuffer(file);
-            } else {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    loadedPages.push({ base64: e.target.result.split(',')[1], type: file.type });
-                    info.innerText = `Gambar siap: ${file.name}`;
-                };
-                reader.readAsDataURL(file);
+                    display.innerText = `PDF Berhasil Dimuat (${pdf.numPages} Halaman)`;
+                } else {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        currentFiles.push({
+                            base64: e.target.result.split(',')[1],
+                            type: file.type
+                        });
+                        display.innerText = `Gambar Berhasil Dimuat: ${file.name}`;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            } catch (err) {
+                display.innerText = "Gagal memproses file.";
+                showToast("Error: File tidak valid.");
             }
         }
 
+        // --- FEATURE 1: WATERMARK ---
         function generateWatermark() {
-            const name = document.getElementById('companyName').value.trim();
-            if (!name) return toast("Isi nama perusahaan!");
+            const rawCompany = document.getElementById('companyName').value.trim();
+            if (!rawCompany) return showToast("Mohon isi nama perusahaan");
+
+            const company = rawCompany.toUpperCase();
             const offset = parseInt(document.getElementById('daysOffset').value) || 0;
             const count = parseInt(document.getElementById('duplicateCount').value) || 1;
-            
-            const date = new Date(); date.setDate(date.getDate() + offset);
-            const dateStr = date.toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'}).toUpperCase();
-            const result = `DIUNGGAH UNTUK SELEKSI KERJA ${name.toUpperCase()} ${dateStr}`;
 
-            document.getElementById('out-f1-single').innerText = result;
-            const list = document.getElementById('out-f1-list');
-            list.innerHTML = '';
+            const d = new Date();
+            d.setDate(d.getDate() + offset);
+            const dateStr = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
+            const text = `DIUNGGAH UNTUK SELEKSI KERJA ${company} ${dateStr}`;
+
+            document.getElementById('singleOutput').innerText = text;
+            const listOutput = document.getElementById('arrayOutput');
+            listOutput.innerHTML = '';
             for(let i=0; i<count; i++) {
-                const d = document.createElement('div'); d.innerText = result; d.style.marginBottom = "5px";
-                list.appendChild(d);
+                const item = document.createElement('div');
+                item.style.marginBottom = "4px";
+                item.innerText = text;
+                listOutput.appendChild(item);
             }
-            document.getElementById('res-f1').classList.remove('hidden');
-        }
-
-        async function runExtraction() {
-            const txt = document.getElementById('descInput').value.trim();
-            if (!txt && !loadedPages.length) return toast("Input teks atau file kosong!");
             
-            setLoading('btn-f2', true);
-            try {
-                let fullTxt = txt;
-                if (loadedPages.length) {
-                    const ocrArr = await Promise.all(loadedPages.map(p => geminiCall("Ekstrak teks kontak dari gambar ini (email, link, wa).", p)));
-                    fullTxt += " " + ocrArr.join(" ");
-                }
-
-                const emails = [...new Set(fullTxt.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]{2,})/g) || [])];
-                const links = [...new Set(fullTxt.match(/((?:https?:\/\/|www\.)[^\s<>"',()]+)/gi) || [])];
-                const was = [...new Set(fullTxt.match(/(\+?62[\s-]?\d{8,15}|08\d{8,13}|wa\.me\/\d+)/g) || [])];
-
-                const out = document.getElementById('out-f2');
-                out.innerHTML = '';
-                if (!emails.length && !links.length && !was.length) out.innerHTML = '<p style="text-align:center; padding:20px;">Kontak tidak ditemukan.</p>';
-                else {
-                    if (emails.length) buildGroup(out, "📧 Email", emails);
-                    if (links.length) buildGroup(out, "🔗 Link / URL", links, true);
-                    if (was.length) buildGroup(out, "💬 WhatsApp", was);
-                }
-                document.getElementById('res-f2').classList.remove('hidden');
-            } catch (e) { toast("Error: " + e.message); }
-            finally { setLoading('btn-f2', false); }
+            document.getElementById('watermarkResult').classList.remove('hidden');
         }
 
+        // --- FEATURE 2: EXTRACTOR ---
+        async function runExtraction() {
+            const textInput = document.getElementById('jobDescription').value.trim();
+            if (!textInput && currentFiles.length === 0) return showToast("Input teks atau file tidak ditemukan");
+
+            setLoading('btnExtract', true);
+            try {
+                let contextTeks = textInput;
+                
+                if (currentFiles.length > 0) {
+                    const ocrResults = await Promise.all(currentFiles.map(f => 
+                        geminiCall("OCR TASK: Transcribe all text accurately. Maintain original casing.", f)
+                    ));
+                    contextTeks += " " + ocrResults.join(" ");
+                }
+                
+                // Optimized regex for accurate extraction
+                const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+                const linkRegex = /((?:https?:\/\/|www\.)[^\s<>"',()]+|(?:\b[a-zA-Z0-9-]+\.(?:ly|ee|com|net|id|me|link|info|be|gl|co|site|online)\/[^\s<>"',()]+))/gi;
+                const waRegex = /(\+?62[\s-]?\d{8,15}|08\d{8,13}|wa\.me\/\d+)/g;
+
+                const emails = [...new Set(contextTeks.match(emailRegex) || [])];
+                const links = [...new Set((contextTeks.match(linkRegex) || []).map(l => l.replace(/[.,]$/, "")))];
+                const was = [...new Set(contextTeks.match(waRegex) || [])];
+
+                const container = document.getElementById('extractorContent');
+                container.innerHTML = '';
+                
+                if (emails.length) renderRes(container, "📧 Email Terdeteksi", emails);
+                if (links.length) renderRes(container, "🔗 Link Terdeteksi", links, true);
+                if (was.length) renderRes(container, "💬 Kontak WhatsApp", was);
+                
+                if (!emails.length && !links.length && !was.length) {
+                    container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted)">Data tidak ditemukan.</div>';
+                }
+                document.getElementById('jobResult').classList.remove('hidden');
+            } catch (e) {
+                showToast("Gagal melakukan ekstraksi.");
+            } finally {
+                setLoading('btnExtract', false);
+            }
+        }
+
+        function renderRes(parent, title, items, isLink = false) {
+            const div = document.createElement('div');
+            div.style.cssText = "background:#fff; border:1px solid var(--border); border-radius:8px; padding:20px; margin-bottom:16px; box-shadow: var(--shadow);";
+            div.innerHTML = `<div style="font-weight:700; font-size:12px; color:var(--primary); margin-bottom:12px; text-transform:uppercase;">${title}</div>`;
+            items.forEach(item => {
+                const el = document.createElement(isLink ? 'a' : 'div');
+                if(isLink) {
+                    el.href = item.startsWith('http') ? item : 'https://' + item;
+                    el.target = "_blank";
+                    el.style.color = "var(--primary)";
+                    el.style.textDecoration = "none";
+                }
+                el.innerText = item;
+                el.style.display = "block";
+                el.style.marginBottom = "6px";
+                el.style.wordBreak = "break-all";
+                el.style.fontSize = "14px";
+                div.appendChild(el);
+            });
+            parent.appendChild(div);
+        }
+
+        // --- FEATURE 3: OCR ---
         async function runOCR() {
-            if (!loadedPages.length) return toast("Unggah file dulu!");
-            setLoading('btn-f3', true);
+            if (currentFiles.length === 0) return showToast("Unggah file terlebih dahulu");
+
+            setLoading('btnOCR', true);
             try {
-                const results = await Promise.all(loadedPages.map((p, i) => geminiCall(`Halaman ${i+1}: Salin semua teks dalam dokumen ini secara lengkap dan rapi.`, p)));
-                document.getElementById('out-f3').innerText = results.join("\n\n--- HALAMAN BARU ---\n\n");
-                document.getElementById('res-f3').classList.remove('hidden');
-            } catch (e) { toast("Error: " + e.message); }
-            finally { setLoading('btn-f3', false); }
+                const prompt = "TRANSCRIPTION TASK: Extract all text. Keep character casing exactly as seen in the document. Raw text only, no conversational filler.";
+                const results = await Promise.all(currentFiles.map(f => geminiCall(prompt, f)));
+                document.getElementById('ocrOutput').innerText = results.join('\n\n--- Halaman Berikutnya ---\n\n');
+                document.getElementById('ocrResult').classList.remove('hidden');
+            } catch (e) {
+                showToast("Gagal memproses gambar.");
+            } finally {
+                setLoading('btnOCR', false);
+            }
         }
 
-        async function geminiCall(prompt, file) {
+        function resetOCR() {
+            document.getElementById('ocrOutput').innerText = '';
+            document.getElementById('ocrResult').classList.add('hidden');
+        }
+
+        // --- API CORE with Exponential Backoff ---
+        async function geminiCall(prompt, fileData) {
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
             const parts = [{ text: prompt }];
-            if (file) parts.push({ inlineData: { mimeType: file.type, data: file.base64 } });
+            if (fileData?.base64) {
+                parts.push({ inlineData: { mimeType: fileData.type, data: fileData.base64 } });
+            }
 
             for (let i = 0; i < 5; i++) {
                 try {
@@ -326,54 +540,53 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ contents: [{ parts }] })
                     });
-                    if (!res.ok) throw new Error("Gagal mengambil data AI");
                     const data = await res.json();
-                    return data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+                    if (data.candidates && data.candidates[0].content.parts[0].text) {
+                        return data.candidates[0].content.parts[0].text;
+                    }
+                    throw new Error("Respon tidak valid");
                 } catch (e) {
+                    if (i === 4) throw e;
                     await new Promise(r => setTimeout(r, Math.pow(2, i) * 1000));
                 }
             }
-            throw new Error("Layanan AI sedang sibuk. Coba lagi nanti.");
         }
 
-        function buildGroup(parent, title, items, isLink = false) {
-            const box = document.createElement('div');
-            box.style.cssText = "background:#fff; border:1px solid var(--border); padding:20px; border-radius:8px; margin-bottom:16px;";
-            box.innerHTML = `<label style="color:var(--primary); font-size:11px;">${title}</label>`;
-            items.forEach(it => {
-                const el = document.createElement(isLink ? 'a' : 'div');
-                if(isLink) { el.href = it.startsWith('http') ? it : 'https://' + it; el.target = "_blank"; el.style.color = "var(--primary)"; }
-                el.innerText = it; el.style.display = "block"; el.style.marginStr = "8px 0"; el.style.fontSize = "14px";
-                box.appendChild(el);
-            });
-            parent.appendChild(box);
+        // --- UTILITIES ---
+        function setLoading(btnId, isLoading) {
+            const btn = document.getElementById(btnId);
+            const span = btn.querySelector('.btn-text');
+            btn.disabled = isLoading;
+            if (isLoading) {
+                span.innerHTML = '<span class="loader"></span> Memproses...';
+            } else {
+                span.innerText = btnId === 'btnOCR' ? 'Proses Scan Teks' : 'Mulai Ekstraksi Kontak';
+            }
         }
 
-        function setLoading(id, show) {
-            const b = document.getElementById(id);
-            b.disabled = show;
-            b.innerHTML = show ? '<span class="loader"></span> Memproses...' : (id==='btn-f3' ? 'Proses Scan Teks' : 'Mulai Ekstraksi Kontak');
-        }
-
-        function copy(id) { 
-            const b = document.getElementById('copyBuffer');
-            b.value = document.getElementById(id).innerText; b.select(); document.execCommand('copy');
-            toast("Berhasil disalin!");
-        }
-
+        function copyText(id) { executeCopy(document.getElementById(id).innerText); }
         function copyList(id) {
-            const b = document.getElementById('copyBuffer');
-            b.value = Array.from(document.querySelectorAll(`#${id} div`)).map(d => d.innerText).join('\n');
-            b.select(); document.execCommand('copy');
-            toast("Semua baris disalin!");
+            const lines = Array.from(document.querySelectorAll(`#${id} div`)).map(d => d.innerText);
+            executeCopy(lines.join('\n'));
         }
 
-        function toast(m) {
+        function executeCopy(val) {
+            const buf = document.getElementById('copyBuffer');
+            buf.value = val;
+            buf.select();
+            document.execCommand('copy');
+            showToast("Berhasil disalin!");
+        }
+
+        function showToast(m) {
             const t = document.createElement('div');
             t.innerText = m;
-            t.style.cssText = "position:fixed; bottom:20px; right:20px; background:#1e293b; color:#fff; padding:12px 24px; border-radius:8px; z-index:999; font-size:13px; box-shadow:0 4px 12px rgba(0,0,0,0.1);";
+            t.style.cssText = `position:fixed; bottom:30px; right:30px; background:#1e293b; color:#fff; padding:12px 24px; border-radius:8px; font-size:13px; z-index:9999; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); transition: opacity 0.5s;`;
             document.body.appendChild(t);
-            setTimeout(() => t.remove(), 3000);
+            setTimeout(() => { 
+                t.style.opacity = '0'; 
+                setTimeout(() => t.remove(), 500); 
+            }, 2500);
         }
     </script>
 </body>
