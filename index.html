@@ -3,591 +3,243 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Career Tool Suite - Professional Edition</title>
-    <!-- Library untuk handling PDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <title>Career Tool - Job Image-to-Text</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root {
-            --primary: #2563eb;
-            --primary-hover: #1d4ed8;
-            --bg-main: #fcfdfe;
-            --sidebar-bg: #ffffff;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
-            --radius: 12px;
-            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+        .loading-shimmer {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
         }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-        }
-
-        body {
-            display: flex;
-            background-color: var(--bg-main);
-            color: var(--text-main);
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        /* Sidebar Responsive Fix */
-        .sidebar {
-            width: 280px;
-            background-color: var(--sidebar-bg);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            position: fixed;
-            height: 100vh;
-            padding: 32px 16px;
-            z-index: 1000;
-            transition: transform 0.3s ease;
-        }
-
-        .brand {
-            padding: 0 12px 32px;
-            font-size: 1.25rem;
-            font-weight: 800;
-            color: var(--primary);
-            letter-spacing: -0.025em;
-            text-transform: uppercase;
-        }
-
-        .nav-menu {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .nav-btn {
-            width: 100%;
-            padding: 12px 16px;
-            border: none;
-            background: transparent;
-            text-align: left;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--text-muted);
-            border-radius: var(--radius);
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .nav-btn.active {
-            background-color: #eff6ff;
-            color: var(--primary);
-            font-weight: 600;
-        }
-
-        /* Content Area */
-        .main-content {
-            margin-left: 280px;
-            flex: 1;
-            padding: 40px;
-            display: flex;
-            justify-content: center;
-            min-width: 0; /* Prevent flex blowout */
-        }
-
-        .container {
-            width: 100%;
-            max-width: 800px;
-        }
-
-        .feature-section {
-            display: none;
-        }
-
-        .feature-section.active {
-            display: block;
-            animation: fadeIn 0.3s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .header-title { margin-bottom: 32px; }
-        .header-title h1 { font-size: 1.875rem; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
-        .header-title p { color: var(--text-muted); font-size: 0.95rem; }
-
-        .card {
-            background: #ffffff;
-            border-radius: var(--radius);
-            padding: 32px;
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-            margin-bottom: 24px;
-        }
-
-        .form-group { margin-bottom: 24px; }
-        label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: var(--text-main); }
-
-        input[type="text"], input[type="number"], textarea {
-            width: 100%;
-            padding: 14px 16px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            font-size: 15px;
-            outline: none;
-            background-color: #fff;
-            color: var(--text-main);
-            transition: border-color 0.2s;
-        }
-        
-        input:focus, textarea:focus {
-            border-color: var(--primary);
-        }
-
-        textarea { min-height: 150px; resize: vertical; }
-
-        .file-upload-wrapper {
-            position: relative;
-            border: 2px dashed var(--border);
-            border-radius: 8px;
-            padding: 30px;
-            text-align: center;
-            background: #f8fafc;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        
-        .file-upload-wrapper:hover {
-            background: #f1f5f9;
-        }
-
-        .file-upload-wrapper input[type="file"] {
-            position: absolute; width: 100%; height: 100%; top: 0; left: 0; opacity: 0; cursor: pointer;
-        }
-
-        .btn-primary {
-            background-color: var(--primary);
-            color: #fff; border: none; padding: 14px 32px; border-radius: 8px;
-            cursor: pointer; font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-            transition: background 0.2s;
-            width: 100%;
-        }
-
-        .btn-primary:hover { background-color: var(--primary-hover); }
-        .btn-primary:disabled { background-color: #94a3b8; cursor: not-allowed; }
-
-        .output-container { margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--border); }
-        .output-container.hidden { display: none; }
-        
-        .output-label { font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 12px; display: block; text-transform: uppercase; }
-        .output-box {
-            background-color: #ffffff; border: 1px solid var(--border); border-radius: 8px;
-            padding: 24px; font-family: 'SFMono-Regular', Consolas, monospace;
-            font-size: 14px; line-height: 1.7; color: #334155; white-space: pre-wrap;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
-        }
-
-        .action-bar { margin-top: 16px; display: flex; gap: 12px; flex-wrap: wrap; }
-        .btn-secondary { background-color: #f1f5f9; color: #475569; border: 1px solid var(--border); padding: 10px 20px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
-        .btn-secondary:hover { background-color: #e2e8f0; }
-
-        .loader {
-            display: inline-block; width: 18px; height: 18px;
-            border: 2px solid rgba(255,255,255,0.3); border-radius: 50%;
-            border-top-color: #fff; animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        #copyBuffer { position: absolute; left: -9999px; }
-
-        /* Tablet & Mobile Responsive Optimization */
-        @media (max-width: 900px) {
-            body { flex-direction: column; }
-            .sidebar { 
-                width: 100%; 
-                height: auto; 
-                position: relative; 
-                border-right: none; 
-                border-bottom: 1px solid var(--border);
-                padding: 16px; 
-            }
-            .brand { padding: 0 0 16px; text-align: center; }
-            .nav-menu { 
-                flex-direction: row; 
-                overflow-x: auto; 
-                padding-bottom: 8px;
-                justify-content: center;
-            }
-            .nav-btn { width: auto; white-space: nowrap; padding: 10px 14px; }
-            .main-content { margin-left: 0; padding: 24px 16px; }
-            .header-title h1 { font-size: 1.5rem; }
-        }
-
-        @media (max-width: 600px) {
-            .nav-menu { justify-content: flex-start; }
-            .action-bar .btn-secondary { width: 100%; }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
         }
     </style>
 </head>
-<body>
+<body class="bg-slate-50 min-h-screen font-sans">
 
-    <textarea id="copyBuffer" aria-hidden="true"></textarea>
+    <div class="flex flex-col md:flex-row min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-full md:w-64 bg-white border-r border-slate-200 p-6">
+            <h1 class="text-blue-700 font-bold text-xl mb-10 tracking-tight">CAREER TOOLS</h1>
+            <nav class="space-y-2">
+                <a href="#" class="block px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg transition">Verification Watermark</a>
+                <a href="#" class="block px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg transition">Contact Extractor</a>
+                <a href="#" class="block px-4 py-2 bg-blue-50 text-blue-700 font-medium rounded-lg">Job Image-to-Text</a>
+            </nav>
+            <div class="mt-auto pt-20">
+                <p class="text-[10px] text-slate-400">Mode Privat: API Key dikonfigurasi secara internal.</p>
+            </div>
+        </aside>
 
-    <nav class="sidebar">
-        <div class="brand">CAREER TOOLS</div>
-        <div class="nav-menu">
-            <button class="nav-btn active" id="btn-tab-feature1" onclick="switchTab('feature1')">Verification Watermark</button>
-            <button class="nav-btn" id="btn-tab-feature2" onclick="switchTab('feature2')">Contact Extractor</button>
-            <button class="nav-btn" id="btn-tab-feature3" onclick="switchTab('feature3')">Job Image-to-Text</button>
-        </div>
-    </nav>
+        <!-- Main Content -->
+        <main class="flex-1 p-4 md:p-12 max-w-5xl">
+            <header class="mb-8">
+                <h2 class="text-3xl font-bold text-slate-800">Job Image-to-Text</h2>
+                <p class="text-slate-500 mt-2">Konversi foto dokumen menjadi teks detail untuk kebutuhan karir Anda.</p>
+            </header>
 
-    <main class="main-content">
-        <div class="container">
-            
-            <!-- FEATURE 1: WATERMARK -->
-            <section id="feature1" class="feature-section active">
-                <div class="header-title">
-                    <h1>Verification Watermark</h1>
-                    <p>Hasilkan teks verifikasi khusus untuk diletakkan pada dokumen lamaran.</p>
-                </div>
-                <div class="card">
-                    <div class="form-group">
-                        <label>Nama Perusahaan</label>
-                        <input type="text" id="companyName" placeholder="Masukkan Nama Perusahaan Tujuan" autocomplete="off">
-                    </div>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
-                        <div class="form-group">
-                            <label>Hari dari Sekarang (0 = Hari ini)</label>
-                            <input type="number" id="daysOffset" value="0" autocomplete="off">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-8">
+                    <label class="block text-sm font-medium text-slate-700 mb-4">Unggah Gambar Dokumen</label>
+                    
+                    <!-- Upload Area -->
+                    <div id="drop-zone" class="border-2 border-dashed border-slate-300 rounded-xl p-10 flex flex-col items-center justify-center bg-slate-50 hover:border-blue-400 hover:bg-blue-50 transition-all cursor-pointer">
+                        <input type="file" id="file-input" class="hidden" accept="image/*">
+                        <div id="upload-icon" class="text-slate-400 mb-4">
+                            <i class="fa-solid fa-cloud-arrow-up text-4xl"></i>
                         </div>
-                        <div class="form-group">
-                            <label>Jumlah Baris Duplikasi</label>
-                            <input type="number" id="duplicateCount" value="1" autocomplete="off">
-                        </div>
-                    </div>
-                    <button class="btn-primary" onclick="generateWatermark()">Generate Watermark</button>
-                </div>
-
-                <div id="watermarkResult" class="output-container hidden">
-                    <span class="output-label">Teks Tunggal</span>
-                    <div class="output-box" id="singleOutput"></div>
-                    <div class="action-bar">
-                        <button class="btn-secondary" onclick="copyText('singleOutput')">Salin Teks</button>
+                        <p id="file-name" class="text-slate-600 font-medium">Klik atau seret file gambar ke sini</p>
+                        <p class="text-slate-400 text-xs mt-1">Mendukung PNG, JPG (Maks. 5MB)</p>
                     </div>
 
-                    <div style="margin-top: 40px;">
-                        <span class="output-label">List Duplikasi</span>
-                        <div class="output-box" id="arrayOutput" style="max-height: 300px; overflow-y: auto;"></div>
-                        <div class="action-bar">
-                            <button class="btn-secondary" onclick="copyList('arrayOutput')">Salin Semua List</button>
-                        </div>
+                    <!-- Preview Area -->
+                    <div id="preview-container" class="hidden mt-6">
+                        <img id="image-preview" src="" class="max-h-64 rounded-lg mx-auto border border-slate-200">
+                    </div>
+
+                    <div class="mt-8 flex justify-center">
+                        <button id="process-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-10 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+                            <span>Proses Scan Teks</span>
+                        </button>
                     </div>
                 </div>
-            </section>
 
-            <!-- FEATURE 2: CONTACT EXTRACTOR -->
-            <section id="feature2" class="feature-section">
-                <div class="header-title">
-                    <h1>Contact & Link Extractor</h1>
-                    <p>Ekstrak kontak (Email & Link) secara akurat dari teks atau dokumen.</p>
-                </div>
-                <div class="card">
-                    <div class="form-group">
-                        <label>Input Teks Deskripsi</label>
-                        <textarea id="jobDescription" placeholder="Tempel detail lowongan di sini..." autocomplete="off"></textarea>
+                <!-- Result Area -->
+                <div id="result-container" class="hidden border-t border-slate-200 bg-slate-50 p-8">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-file-lines text-blue-600"></i> Hasil Ekstraksi
+                        </h3>
+                        <button id="copy-btn" class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1">
+                            <i class="fa-regular fa-copy"></i> Salin Teks
+                        </button>
                     </div>
-                    <div class="form-group">
-                        <label>Atau Unggah Gambar/PDF Iklan</label>
-                        <div class="file-upload-wrapper">
-                            <div class="file-info" id="fileNameExtractor">Pilih atau Seret file ke sini</div>
-                            <input type="file" id="fileExtractor" accept="image/*,application/pdf" onchange="handleFileInput(this, 'fileNameExtractor')">
-                        </div>
-                    </div>
-                    <button class="btn-primary" id="btnExtract" onclick="runExtraction()">
-                        <span class="btn-text">Mulai Ekstraksi Kontak</span>
-                    </button>
-                </div>
-
-                <div id="jobResult" class="output-container hidden">
-                    <div id="extractorContent"></div>
-                </div>
-            </section>
-
-            <!-- FEATURE 3: IMAGE TO TEXT -->
-            <section id="feature3" class="feature-section">
-                <div class="header-title">
-                    <h1>Job Image-to-Text</h1>
-                    <p>Konversi foto lowongan kerja menjadi teks detail tanpa mengubah karakter asli.</p>
-                </div>
-                <div class="card">
-                    <div class="form-group">
-                        <label>Unggah Gambar/PDF Dokumen</label>
-                        <div class="file-upload-wrapper">
-                            <div class="file-info" id="fileNameOCR">Pilih atau Seret file ke sini</div>
-                            <input type="file" id="fileOCR" accept="image/*,application/pdf" onchange="handleFileInput(this, 'fileNameOCR')">
-                        </div>
-                    </div>
-                    <button class="btn-primary" id="btnOCR" onclick="runOCR()">
-                        <span class="btn-text">Proses Scan Teks</span>
-                    </button>
-                </div>
-
-                <div id="ocrResult" class="output-container hidden">
-                    <span class="output-label">Hasil Scan (Case Sensitive)</span>
-                    <div class="output-box" id="ocrOutput" style="max-height: 500px; overflow-y: auto;"></div>
-                    <div class="action-bar">
-                        <button class="btn-secondary" onclick="copyText('ocrOutput')">Salin Hasil Scan</button>
-                        <button class="btn-secondary" onclick="resetOCR()">Bersihkan</button>
+                    <div id="text-result" class="bg-white p-6 rounded-xl border border-slate-200 text-slate-700 whitespace-pre-wrap leading-relaxed min-h-[200px]">
+                        <!-- Output text will appear here -->
                     </div>
                 </div>
-            </section>
+            </div>
 
-        </div>
-    </main>
+            <!-- Toast Notifications -->
+            <div id="toast-container" class="fixed bottom-6 right-6 space-y-3 z-50"></div>
+        </main>
+    </div>
 
     <script>
-        const apiKey = ""; 
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-        
-        // Simpan data file per tab agar tidak bertabrakan
-        let currentFiles = []; 
+        const apiKey = ""; // Disediakan oleh environment
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const fileNameDisplay = document.getElementById('file-name');
+        const processBtn = document.getElementById('process-btn');
+        const resultContainer = document.getElementById('result-container');
+        const textResult = document.getElementById('text-result');
+        const previewContainer = document.getElementById('preview-container');
+        const imagePreview = document.getElementById('image-preview');
+        const copyBtn = document.getElementById('copy-btn');
 
-        function switchTab(id) {
-            document.querySelectorAll('.feature-section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            document.getElementById('btn-tab-' + id).classList.add('active');
-            // Reset files saat pindah tab agar bersih
-            currentFiles = [];
+        let base64Image = "";
+
+        // Toast Helper
+        function showToast(message, type = 'error') {
+            const toast = document.createElement('div');
+            const bgColor = type === 'error' ? 'bg-slate-800' : 'bg-green-600';
+            toast.className = `${bgColor} text-white px-6 py-3 rounded-xl shadow-lg flex items-center gap-3 animate-bounce-in max-w-md`;
+            toast.innerHTML = `
+                <i class="fa-solid ${type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-check'}"></i>
+                <span class="text-sm font-medium">${message}</span>
+            `;
+            document.getElementById('toast-container').appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
         }
 
-        async function handleFileInput(input, displayId) {
-            const file = input.files[0];
-            if (!file) return;
-            
-            const display = document.getElementById(displayId);
-            display.innerText = `Memproses: ${file.name}...`;
-            currentFiles = [];
+        // File Selection
+        dropZone.onclick = () => fileInput.click();
 
-            try {
-                if (file.type === "application/pdf") {
-                    const arrayBuffer = await file.arrayBuffer();
-                    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-                    
-                    for (let i = 1; i <= pdf.numPages; i++) {
-                        const page = await pdf.getPage(i);
-                        const viewport = page.getViewport({ scale: 2.0 });
-                        const canvas = document.createElement('canvas');
-                        const context = canvas.getContext('2d');
-                        canvas.height = viewport.height;
-                        canvas.width = viewport.width;
-                        
-                        await page.render({ canvasContext: context, viewport: viewport }).promise;
-                        currentFiles.push({
-                            base64: canvas.toDataURL('image/png').split(',')[1],
-                            type: 'image/png'
-                        });
-                    }
-                    display.innerText = `PDF Berhasil Dimuat (${pdf.numPages} Halaman)`;
-                } else {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        currentFiles.push({
-                            base64: e.target.result.split(',')[1],
-                            type: file.type
-                        });
-                        display.innerText = `Gambar Berhasil Dimuat: ${file.name}`;
-                    };
-                    reader.readAsDataURL(file);
-                }
-            } catch (err) {
-                display.innerText = "Gagal memproses file.";
-                showToast("Error: File tidak valid.");
-            }
-        }
+        fileInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) handleFile(file);
+        };
 
-        // --- FEATURE 1: WATERMARK ---
-        function generateWatermark() {
-            const rawCompany = document.getElementById('companyName').value.trim();
-            if (!rawCompany) return showToast("Mohon isi nama perusahaan");
-
-            const company = rawCompany.toUpperCase();
-            const offset = parseInt(document.getElementById('daysOffset').value) || 0;
-            const count = parseInt(document.getElementById('duplicateCount').value) || 1;
-
-            const d = new Date();
-            d.setDate(d.getDate() + offset);
-            const dateStr = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
-            const text = `DIUNGGAH UNTUK SELEKSI KERJA ${company} ${dateStr}`;
-
-            document.getElementById('singleOutput').innerText = text;
-            const listOutput = document.getElementById('arrayOutput');
-            listOutput.innerHTML = '';
-            for(let i=0; i<count; i++) {
-                const item = document.createElement('div');
-                item.style.marginBottom = "4px";
-                item.innerText = text;
-                listOutput.appendChild(item);
-            }
-            
-            document.getElementById('watermarkResult').classList.remove('hidden');
-        }
-
-        // --- FEATURE 2: EXTRACTOR ---
-        async function runExtraction() {
-            const textInput = document.getElementById('jobDescription').value.trim();
-            if (!textInput && currentFiles.length === 0) return showToast("Input teks atau file tidak ditemukan");
-
-            setLoading('btnExtract', true);
-            try {
-                let contextTeks = textInput;
-                
-                if (currentFiles.length > 0) {
-                    const ocrResults = await Promise.all(currentFiles.map(f => 
-                        geminiCall("OCR TASK: Transcribe all text accurately. Maintain original casing.", f)
-                    ));
-                    contextTeks += " " + ocrResults.join(" ");
-                }
-                
-                // Optimized regex for accurate extraction
-                const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
-                const linkRegex = /((?:https?:\/\/|www\.)[^\s<>"',()]+|(?:\b[a-zA-Z0-9-]+\.(?:ly|ee|com|net|id|me|link|info|be|gl|co|site|online)\/[^\s<>"',()]+))/gi;
-                const waRegex = /(\+?62[\s-]?\d{8,15}|08\d{8,13}|wa\.me\/\d+)/g;
-
-                const emails = [...new Set(contextTeks.match(emailRegex) || [])];
-                const links = [...new Set((contextTeks.match(linkRegex) || []).map(l => l.replace(/[.,]$/, "")))];
-                const was = [...new Set(contextTeks.match(waRegex) || [])];
-
-                const container = document.getElementById('extractorContent');
-                container.innerHTML = '';
-                
-                if (emails.length) renderRes(container, "📧 Email Terdeteksi", emails);
-                if (links.length) renderRes(container, "🔗 Link Terdeteksi", links, true);
-                if (was.length) renderRes(container, "💬 Kontak WhatsApp", was);
-                
-                if (!emails.length && !links.length && !was.length) {
-                    container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted)">Data tidak ditemukan.</div>';
-                }
-                document.getElementById('jobResult').classList.remove('hidden');
-            } catch (e) {
-                showToast("Gagal melakukan ekstraksi.");
-            } finally {
-                setLoading('btnExtract', false);
-            }
-        }
-
-        function renderRes(parent, title, items, isLink = false) {
-            const div = document.createElement('div');
-            div.style.cssText = "background:#fff; border:1px solid var(--border); border-radius:8px; padding:20px; margin-bottom:16px; box-shadow: var(--shadow);";
-            div.innerHTML = `<div style="font-weight:700; font-size:12px; color:var(--primary); margin-bottom:12px; text-transform:uppercase;">${title}</div>`;
-            items.forEach(item => {
-                const el = document.createElement(isLink ? 'a' : 'div');
-                if(isLink) {
-                    el.href = item.startsWith('http') ? item : 'https://' + item;
-                    el.target = "_blank";
-                    el.style.color = "var(--primary)";
-                    el.style.textDecoration = "none";
-                }
-                el.innerText = item;
-                el.style.display = "block";
-                el.style.marginBottom = "6px";
-                el.style.wordBreak = "break-all";
-                el.style.fontSize = "14px";
-                div.appendChild(el);
-            });
-            parent.appendChild(div);
-        }
-
-        // --- FEATURE 3: OCR ---
-        async function runOCR() {
-            if (currentFiles.length === 0) return showToast("Unggah file terlebih dahulu");
-
-            setLoading('btnOCR', true);
-            try {
-                const prompt = "TRANSCRIPTION TASK: Extract all text. Keep character casing exactly as seen in the document. Raw text only, no conversational filler.";
-                const results = await Promise.all(currentFiles.map(f => geminiCall(prompt, f)));
-                document.getElementById('ocrOutput').innerText = results.join('\n\n--- Halaman Berikutnya ---\n\n');
-                document.getElementById('ocrResult').classList.remove('hidden');
-            } catch (e) {
-                showToast("Gagal memproses gambar.");
-            } finally {
-                setLoading('btnOCR', false);
-            }
-        }
-
-        function resetOCR() {
-            document.getElementById('ocrOutput').innerText = '';
-            document.getElementById('ocrResult').classList.add('hidden');
-        }
-
-        // --- API CORE with Exponential Backoff ---
-        async function geminiCall(prompt, fileData) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-            const parts = [{ text: prompt }];
-            if (fileData?.base64) {
-                parts.push({ inlineData: { mimeType: fileData.type, data: fileData.base64 } });
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) {
+                showToast("Mohon unggah file gambar (PNG/JPG).");
+                return;
             }
 
-            for (let i = 0; i < 5; i++) {
+            fileNameDisplay.innerText = `File siap: ${file.name}`;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                base64Image = e.target.result.split(',')[1];
+                imagePreview.src = e.target.result;
+                previewContainer.classList.remove('hidden');
+                resultContainer.classList.add('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // API Call with Exponential Backoff
+        async function fetchWithRetry(url, options, maxRetries = 5) {
+            for (let i = 0; i < maxRetries; i++) {
                 try {
-                    const res = await fetch(url, {
+                    const response = await fetch(url, options);
+                    if (response.ok) return await response.json();
+                    
+                    if (response.status === 429 || response.status >= 500) {
+                        const delay = Math.pow(2, i) * 1000;
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        continue;
+                    }
+                    throw new Error(`HTTP Error: ${response.status}`);
+                } catch (err) {
+                    if (i === maxRetries - 1) throw err;
+                    const delay = Math.pow(2, i) * 1000;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+            }
+        }
+
+        // Process Action
+        processBtn.onclick = async () => {
+            if (!base64Image) {
+                showToast("Pilih gambar terlebih dahulu.");
+                return;
+            }
+
+            processBtn.disabled = true;
+            processBtn.innerHTML = `<i class="fa-solid fa-circle-notch animate-spin"></i> Memproses...`;
+            textResult.innerHTML = `<div class="loading-shimmer h-4 w-full mb-2 rounded"></div><div class="loading-shimmer h-4 w-3/4 rounded"></div>`;
+            resultContainer.classList.remove('hidden');
+
+            try {
+                const prompt = "Ekstrak semua teks dari gambar ini secara akurat. Jaga format struktur dokumen jika memungkinkan (seperti daftar, judul, atau tabel sederhana). Jika ini adalah dokumen pekerjaan, identifikasikan poin-poin utamanya.";
+                
+                const payload = {
+                    contents: [{
+                        parts: [
+                            { text: prompt },
+                            { inlineData: { mimeType: "image/png", data: base64Image } }
+                        ]
+                    }]
+                };
+
+                const result = await fetchWithRetry(
+                    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,
+                    {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ contents: [{ parts }] })
-                    });
-                    const data = await res.json();
-                    if (data.candidates && data.candidates[0].content.parts[0].text) {
-                        return data.candidates[0].content.parts[0].text;
+                        body: JSON.stringify(payload)
                     }
-                    throw new Error("Respon tidak valid");
-                } catch (e) {
-                    if (i === 4) throw e;
-                    await new Promise(r => setTimeout(r, Math.pow(2, i) * 1000));
+                );
+
+                const extractedText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                if (extractedText) {
+                    textResult.innerText = extractedText;
+                } else {
+                    throw new Error("Gagal mengekstrak teks.");
                 }
+
+            } catch (error) {
+                console.error(error);
+                showToast("Layanan AI sedang sibuk atau gagal memproses. Silakan coba sesaat lagi.");
+                resultContainer.classList.add('hidden');
+            } finally {
+                processBtn.disabled = false;
+                processBtn.innerHTML = `<span>Proses Scan Teks</span>`;
             }
-        }
+        };
 
-        // --- UTILITIES ---
-        function setLoading(btnId, isLoading) {
-            const btn = document.getElementById(btnId);
-            const span = btn.querySelector('.btn-text');
-            btn.disabled = isLoading;
-            if (isLoading) {
-                span.innerHTML = '<span class="loader"></span> Memproses...';
-            } else {
-                span.innerText = btnId === 'btnOCR' ? 'Proses Scan Teks' : 'Mulai Ekstraksi Kontak';
-            }
-        }
-
-        function copyText(id) { executeCopy(document.getElementById(id).innerText); }
-        function copyList(id) {
-            const lines = Array.from(document.querySelectorAll(`#${id} div`)).map(d => d.innerText);
-            executeCopy(lines.join('\n'));
-        }
-
-        function executeCopy(val) {
-            const buf = document.getElementById('copyBuffer');
-            buf.value = val;
-            buf.select();
+        // Copy Text
+        copyBtn.onclick = () => {
+            const text = textResult.innerText;
+            const el = document.createElement('textarea');
+            el.value = text;
+            document.body.appendChild(el);
+            el.select();
             document.execCommand('copy');
-            showToast("Berhasil disalin!");
-        }
+            document.body.removeChild(el);
+            showToast("Teks berhasil disalin!", "success");
+        };
 
-        function showToast(m) {
-            const t = document.createElement('div');
-            t.innerText = m;
-            t.style.cssText = `position:fixed; bottom:30px; right:30px; background:#1e293b; color:#fff; padding:12px 24px; border-radius:8px; font-size:13px; z-index:9999; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); transition: opacity 0.5s;`;
-            document.body.appendChild(t);
-            setTimeout(() => { 
-                t.style.opacity = '0'; 
-                setTimeout(() => t.remove(), 500); 
-            }, 2500);
-        }
+        // Drag and Drop
+        dropZone.ondragover = (e) => {
+            e.preventDefault();
+            dropZone.classList.add('border-blue-500', 'bg-blue-50');
+        };
+
+        dropZone.ondragleave = () => {
+            dropZone.classList.remove('border-blue-500', 'bg-blue-50');
+        };
+
+        dropZone.ondrop = (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('border-blue-500', 'bg-blue-50');
+            const file = e.dataTransfer.files[0];
+            if (file) handleFile(file);
+        };
     </script>
 </body>
 </html>
